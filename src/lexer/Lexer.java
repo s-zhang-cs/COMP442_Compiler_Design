@@ -1,6 +1,7 @@
 package lexer;
 import buffer.Buffer;
 import DFA.*;
+import symbol.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 
 public class Lexer {
     Buffer buffer;
-    ArrayList<Token> matchingLexemes;
+    ArrayList<Symbol> matchingLexemes;
     DFAFloat dfaFloat;
     DFAInteger dfaInteger;
     DFAId dfaId;
@@ -23,6 +24,10 @@ public class Lexer {
         dfaId = new DFAId("DFAId");
         dfaString = new DFAString("DFAString");
         line = 1;
+    }
+
+    public boolean reachedEOF() {
+        return buffer.peek() == (char)65535;
     }
 
     private void removeWhiteSpace(Buffer buffer) throws Exception{
@@ -86,7 +91,7 @@ public class Lexer {
 
     }
 
-    public Token nextToken() throws Exception{
+    public Symbol nextToken() throws Exception{
         String currLexeme;
 
         //remove space and comment
@@ -94,7 +99,7 @@ public class Lexer {
             removeWhiteSpace(buffer);
             removeSingleLineComment(buffer);
             removeMultiLineComment(buffer);
-            if(buffer.peek() != ' ' && buffer.peek() != '\t' && buffer.peek() != '\r' && buffer.peek() != '\n' && buffer.peek() != '\\' && buffer.peek() != (char)65535){
+            if(buffer.peek() != ' ' && buffer.peek() != '\t' && buffer.peek() != '\r' && buffer.peek() != '\n' && buffer.peek() != '\\'){
                 break;
             }
         }
@@ -107,7 +112,7 @@ public class Lexer {
         }
         currLexeme = buffer.copyLexeme();
         if(!currLexeme.equals("")) {
-            matchingLexemes.add(new Token("Integer", currLexeme));
+            matchingLexemes.add(new Symbol("intnum", currLexeme, true));
         }
 
         //float parsing
@@ -117,7 +122,7 @@ public class Lexer {
         }
         currLexeme = buffer.copyLexeme();
         if(!currLexeme.equals("")) {
-            matchingLexemes.add(new Token("Float", currLexeme));
+            matchingLexemes.add(new Symbol("floatnum", currLexeme, true));
         }
 
         //id parsing
@@ -127,7 +132,7 @@ public class Lexer {
         }
         currLexeme = buffer.copyLexeme();
         if(!currLexeme.equals("")) {
-            matchingLexemes.add(new Token("Id", currLexeme));
+            matchingLexemes.add(new Symbol("id", currLexeme, true));
         }
 
         //string parsing
@@ -137,14 +142,14 @@ public class Lexer {
         }
         currLexeme = buffer.copyLexeme();
         if(currLexeme.length() >= 2 && currLexeme.charAt(0) == '\"' && currLexeme.charAt(currLexeme.length() - 1) == '\"') {
-            matchingLexemes.add(new Token("String", currLexeme));
+            matchingLexemes.add(new Symbol("String", currLexeme, true));
         }
 
         //operator parsing
         buffer.load(save);
         currLexeme = Character.toString(buffer.peek());
         if(Operators.operators.contains(currLexeme)){
-            matchingLexemes.add(new Token("Operator", currLexeme));
+            matchingLexemes.add(new Symbol(currLexeme, currLexeme, true));
             buffer.extend();
         }
         if(currLexeme.equals("=") && buffer.peek() == '=' ||
@@ -153,21 +158,24 @@ public class Lexer {
            currLexeme.equals("<") && buffer.peek() == '>' ||
            currLexeme.equals("<") && buffer.peek() == '='){
             buffer.extend();
-            matchingLexemes.add(new Token("Operator", buffer.copyLexeme()));
+            matchingLexemes.add(new Symbol(buffer.copyLexeme(), buffer.copyLexeme(), true));
         }
 
         //pick longest matching lexeme
-        Token longestLexeme = new Token("", "");
-        for(Token t : matchingLexemes) {
-            if(t.getLength() > longestLexeme.getLength()) {
+        Symbol longestLexeme = new Symbol("", "", true);
+        for(Symbol t : matchingLexemes) {
+            if(t.lexeme.length() > longestLexeme.lexeme.length()) {
                 longestLexeme = t;
             }
         }
 
         //advance buffer up to longest matching lexeme and reset
         buffer.load(save);
-        for(int i = 0; i < longestLexeme.getLength(); i++) {
+        for(int i = 0; i < longestLexeme.lexeme.length(); i++) {
             buffer.extend();
+        }
+        if(buffer.peek() == (char)65535) {
+            return new Symbol("$", "EOF", true);
         }
         buffer.synchPtrBasedOnForwardPtr();
         matchingLexemes.clear();
@@ -175,6 +183,9 @@ public class Lexer {
         dfaString.resetDFA(dfaString);
         dfaFloat.resetDFA();
         dfaId.resetDFA(dfaId);
-        return longestLexeme.isEmpty()? null : longestLexeme;
+        if(longestLexeme.isEmpty()) {
+            return null;
+        }
+        return longestLexeme;
     }
 }

@@ -1,10 +1,13 @@
-package grammar;
+package symbol;
+
+import grammar.Grammar;
 
 import java.util.*;
 
 public class Symbol {
-    String symbol;
-    boolean isTerminal;
+    public String symbol;
+    public String lexeme;
+    public boolean isTerminal;
     Set<Symbol> firstSet;
     Set<Symbol> followSet;
 
@@ -13,6 +16,43 @@ public class Symbol {
         this.isTerminal = isTerminal;
         this.firstSet = new HashSet<>();
         this.followSet = new HashSet<>();
+    }
+
+    public Symbol (String symbol, String lexeme, boolean isTerminal) {
+        this.symbol = symbol;
+        this.lexeme = lexeme;
+        this.isTerminal = isTerminal;
+        convertKeyword(lexeme);
+        this.firstSet = new HashSet<>();
+        this.followSet = new HashSet<>();
+    }
+
+    private void convertKeyword(String lexeme) {
+        if(Keywords.keywords.contains(lexeme)) {
+            this.symbol = this.lexeme;
+        }
+        if(this.symbol.equals("::")) {
+            this.symbol = "sr";
+        }
+        else if(this.symbol.equals("=")) {
+            this.symbol = "assign";
+        }
+        else if(this.symbol.equals("<=")) {
+            this.symbol = "leq";
+        }
+        else if(this.symbol.equals("<")) {
+            this.symbol = "lt";
+        }
+        else if(this.symbol.equals(">=")) {
+            this.symbol = "geq";
+        }
+        else if(this.symbol.equals(">")) {
+            this.symbol = "gt";
+        }
+    }
+
+    public boolean isEmpty() {
+        return symbol.isEmpty();
     }
 
 //    public Symbol (Symbol s) {
@@ -185,10 +225,10 @@ public class Symbol {
     public String toString() {
         String s = symbol;
         if(isTerminal) {
-            s += ": terminal";
+            s += " -> " + lexeme;
         }
         else {
-            s += ": nonTerminal";
+            s += " -> nonTerminal";
         }
         return s;
     }

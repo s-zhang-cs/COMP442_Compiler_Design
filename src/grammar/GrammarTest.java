@@ -1,11 +1,10 @@
 package grammar;
 
+import symbol.Symbol;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class GrammarTest {
     public static void main(String[] args) throws Exception{

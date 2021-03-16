@@ -1,5 +1,7 @@
 package grammar;
 
+import symbol.Symbol;
+
 import java.io.BufferedReader;
 import java.util.*;
 

@@ -12,7 +12,7 @@ public class DFAFloat {
 
     //integer . fraction . [e [+|-] integer]
     enum compositionState {
-        INTEGER1, FRACTION, E, PLUSMINUS, INTEGER2
+        INTEGER1, INTEGER1_SUCCESS, FRACTION, FRACTION_SUCCESS, E, PLUSMINUS, INTEGER2
     }
 
     public DFAFloat (String s) {
@@ -28,7 +28,16 @@ public class DFAFloat {
             case INTEGER1:
                 res = dfaInteger.transition(dfaInteger, c);
                 if (res) {
+                    curr = compositionState.INTEGER1_SUCCESS;
                     break;
+                }
+                else {
+                    return false;
+                }
+            case INTEGER1_SUCCESS:
+                res = dfaInteger.transition(dfaInteger, c);
+                if (res) {
+                    return true;
                 }
                 else {
                     curr = compositionState.FRACTION;
@@ -36,6 +45,16 @@ public class DFAFloat {
             case FRACTION:
                 res = dfaFraction.transition(dfaFraction, c);
                 if(res) {
+                    curr = compositionState.FRACTION_SUCCESS;
+                    break;
+                }
+                else {
+                    return false;
+                }
+            case FRACTION_SUCCESS:
+                res = dfaFraction.transition(dfaFraction, c);
+                if(res) {
+                    curr = compositionState.FRACTION_SUCCESS;
                     break;
                 }
                 else {
@@ -48,8 +67,7 @@ public class DFAFloat {
                     break;
                 }
                 else {
-                    res = false;
-                    break;
+                    return false;
                 }
             case PLUSMINUS:
                 if(c == '+' || c == '-') {
@@ -70,14 +88,19 @@ public class DFAFloat {
 
     public boolean evaluateInput(String s) {
         CharacterIterator ci = new StringCharacterIterator(s);
+        char currChar = ci.current();
         while(ci.current() != CharacterIterator.DONE) {
-            if(transition(ci.current()) == false) {
+            currChar = ci.current();
+            if(transition(currChar) == false) {
                 resetDFA();
                 return false;
             }
             ci.next();
         }
         resetDFA();
+        if(currChar == 'e' || currChar == 'E') {
+            return false;
+        }
         return true;
     }
 

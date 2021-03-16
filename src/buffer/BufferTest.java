@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Random;
 
+/**
+ * Please set Config.buffersize to a small number for testing purpose.
+ */
 public class BufferTest {
     public static void main(String[] args) throws Exception{
-        BufferedReader source = new BufferedReader(new FileReader("src/buffer/bufferTestInput2"));
+        BufferedReader source = new BufferedReader(new FileReader("resources/buffer/bufferTestInput2"));
         Buffer buffer = new Buffer(source);
 
         System.out.println("~~~~~test the buffer will not retract if buffer position is at the start~~~~~");

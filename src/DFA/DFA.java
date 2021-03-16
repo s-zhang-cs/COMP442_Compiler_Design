@@ -34,6 +34,9 @@ public class DFA {
         for(char c = 'a'; c <= 'z'; c++) {
             alphabet.add(c);
         }
+        for(char c = 'A'; c <= 'Z'; c++) {
+            alphabet.add(c);
+        }
     }
 
     public void addNumeralAlphabet() {

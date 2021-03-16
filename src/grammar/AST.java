@@ -1,5 +1,7 @@
 package grammar;
 
+import symbol.Symbol;
+
 import java.util.List;
 
 public class AST {
@@ -9,9 +11,14 @@ public class AST {
     AST rightSibling;
     Symbol nodeSymbol;
 
-//    public AST() {
-//        node = new Symbol("UNDEFINED", true);
-//    }
+    public AST() {
+        leftMostSibling = this;
+    }
+
+    public AST(Symbol s) {
+        leftMostSibling = this;
+        nodeSymbol = s;
+    }
 
     public AST makeSiblings(AST y) {
         //go to rightmost sibling
@@ -59,12 +66,34 @@ public class AST {
     }
 
     public AST makeNode(Symbol s) {
-        AST node = new AST();
-        node.nodeSymbol = new Symbol(s.symbol, s.isTerminal);
+        AST node = new AST(s);
         return node;
     }
 
     public Symbol getNodeSymbol() {
         return nodeSymbol;
+    }
+
+    public String toString()
+    {
+        StringBuilder buffer = new StringBuilder(50);
+        print(buffer, "", "");
+        return buffer.toString();
+    }
+
+    private void print(StringBuilder buffer, String prefix, String childrenPrefix) {
+        buffer.append(prefix);
+        buffer.append(nodeSymbol);
+        buffer.append('\n');
+        AST children = leftMostChild;
+        while(children != null) {
+            if(children.rightSibling != null) {
+                children.print(buffer, childrenPrefix + "├── ", childrenPrefix + "│   ");
+            }
+            else {
+                children.print(buffer, childrenPrefix + "└── ", childrenPrefix + "    ");
+            }
+            children = children.rightSibling;
+        }
     }
 }

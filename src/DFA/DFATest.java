@@ -9,12 +9,12 @@ public class DFATest {
         System.out.println("dfaString verdict for " + dfaStringInput + ": " + dfaStringVerdict);
 
         DFAFloat dfaFloat = new DFAFloat("DFAFloat");
-        String dfaFloatInput = "1324.345e+123";
+        String dfaFloatInput = "1.2e-234.1";
         boolean dfaFloatVerdict = dfaFloat.evaluateInput(dfaFloatInput);
         System.out.println("dfaFloat verdict for " + dfaFloatInput + ": " + dfaFloatVerdict);
 
         DFAFraction dfaFraction = new DFAFraction("DFAFraction");
-        String dfaFractionInput = ".13203";
+        String dfaFractionInput = ".12345";
         boolean dfaFractionVerdict = dfaFraction.evaluateInput(dfaFraction, dfaFractionInput);
         System.out.println("dfaFraction verdict for " + dfaFractionInput + ": " + dfaFractionVerdict);
 

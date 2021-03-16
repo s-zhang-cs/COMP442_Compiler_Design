@@ -1,16 +1,18 @@
 package grammar;
 
-import java.io.BufferedReader;
+import lexer.Lexer;
+import symbol.Symbol;
+
 import java.io.FileReader;
 import java.util.*;
 
 public class Parser {
 
     private Symbol lookahead;
-    private Scanner scanner;
+    private Lexer lexer;
 
     public Parser(String filePath) throws Exception{
-        scanner = new Scanner(new FileReader(filePath));
+        lexer = new Lexer(filePath);
     }
 
     public boolean parse() throws Exception{
@@ -32,7 +34,8 @@ public class Parser {
 
     private boolean recursiveDescentParse(Symbol startSymbol) throws Exception{
         //---------------------------------debug purposes -------------------------------------
-        System.out.print(lookahead.symbol + " ");
+            System.out.print(lookahead.symbol + " ");
+
         if(lookahead.equals(new Symbol("read", true))) {
             int debug = 0; //debug purpose
         }
@@ -74,15 +77,14 @@ public class Parser {
     }
 
     public Symbol nextToken() throws Exception{
-        String str = null;
-        if(scanner.hasNext()) {
-            str = scanner.next();
+        Symbol s = null;
+        if(!lexer.reachedEOF()) {
+            s = lexer.nextToken();
         }
         else {
-            str = "$";
+            s = new Symbol("$", "EOF", true);
         }
-
-        return new Symbol(str, true);
+        return s;
     }
 
 }
