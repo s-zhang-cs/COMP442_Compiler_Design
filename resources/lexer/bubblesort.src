@@ -1,4 +1,4 @@
-//sort the array
+//print the array
 func bubbleSort(integer arr[], integer size) : void
 {
   var
@@ -61,3 +61,4 @@ main
   bubbleSort(arr, 7);
   printarray(arr, 7);
 }
+

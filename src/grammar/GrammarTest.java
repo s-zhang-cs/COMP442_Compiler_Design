@@ -8,7 +8,7 @@ import java.util.HashSet;
 
 public class GrammarTest {
     public static void main(String[] args) throws Exception{
-        Grammar.initialize(new BufferedReader(new FileReader("src/grammar/LL1.paquet.grm")));
+        Grammar.initialize(new BufferedReader(new FileReader("resources/grammar/LL1.paquet.grm")));
         //Grammar.initialize(new BufferedReader(new FileReader("src/grammar/test.grm")));
         Grammar.showGrammar();
 

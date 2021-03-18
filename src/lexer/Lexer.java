@@ -26,6 +26,8 @@ public class Lexer {
         line = 1;
     }
 
+    public int getLine() {return line;}
+
     public boolean reachedEOF() {
         return buffer.peek() == (char)65535;
     }
