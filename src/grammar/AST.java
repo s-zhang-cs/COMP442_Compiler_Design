@@ -55,19 +55,18 @@ public class AST {
         return leftMostChild;
     }
 
-    public AST makeFamily(Symbol op, List<AST> l) {
-        AST child = null;
-        for(int i = 0; i < l.size() - 1; i++) {
-            child = l.get(i).makeSiblings(l.get(i+1));
-        }
-        AST node = makeNode(op);
-        node.adoptChildren(child);
-        return node;
-    }
+//    public AST makeFamily(Symbol op, List<AST> l) {
+//        AST child = null;
+//        for(int i = 0; i < l.size() - 1; i++) {
+//            child = l.get(i).makeSiblings(l.get(i+1));
+//        }
+//        AST node = makeNode(op);
+//        node.adoptChildren(child);
+//        return node;
+//    }
 
-    public AST makeNode(Symbol s) {
-        AST node = new AST(s);
-        return node;
+    public void makeNode(Symbol s) {
+        nodeSymbol = s;
     }
 
     public Symbol getNodeSymbol() {

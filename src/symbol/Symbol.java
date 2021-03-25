@@ -79,24 +79,23 @@ public class Symbol {
             else {
                 for (List<Symbol> rule : Grammar.productions.get(s)) {
                     //rule 2.1 -> FIRST(A) takes FIRST(S1) - epsilon
-                    if(!rule.isEmpty() && !rule.get(0).symbol.equals("EPSILON")) {
-                        s.firstSet.addAll(computeFirstSet(rule.get(0)));
-                    }
                     //rule 2.2 -> if (FIRST(S1) FIRST(S2) ... FIRST(Si)) contain epsilon, FIRST(A) takes FIRST(S(i+1))
                     boolean allEpsilon = true;
                     for(Symbol i : rule) {
-                        i.computeFirstSet(i);
-                        if(i.firstSet.contains(new Symbol("EPSILON", true))) {
-                            continue;
-                        }
+                        Set<Symbol> iFirst = i.computeFirstSet(i);
+                        s.firstSet.addAll(iFirst);
                         //arriving at S(i+1)
-                        s.firstSet.addAll(computeFirstSet(i));
-                        allEpsilon = false;
-                        break;
+                        if(!iFirst.contains(new Symbol("EPSILON", true))) {
+                            allEpsilon = false;
+                            break;
+                        }
                     }
                     //rule 2.3 -> if (FIRST(S1) FIRST(S2) ... FIRST(Sk)) is epsilon, FIRST(A) takes epsilon
                     if(allEpsilon) {
                         s.firstSet.add(new Symbol("EPSILON", true));
+                    }
+                    else {
+                        s.firstSet.remove(new Symbol("EPSILON", true));
                     }
                 }
             }

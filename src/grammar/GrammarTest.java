@@ -12,7 +12,7 @@ public class GrammarTest {
         //Grammar.initialize(new BufferedReader(new FileReader("src/grammar/test.grm")));
         Grammar.showGrammar();
 
-        Symbol s1 = new Symbol("VariableIdnest", false);
+        Symbol s1 = new Symbol("Prog", false);
         s1.computeFirstSet(s1);
         s1.showFirstSet();
         s1.computeFollowSet(s1, new HashSet<Symbol>());

@@ -11,5 +11,6 @@ public class ParserTest {
 
         Parser parser = new Parser("resources/lexer/polynomial.src");
         System.out.println(parser.parse());
+        parser.showAST();
     }
 }
