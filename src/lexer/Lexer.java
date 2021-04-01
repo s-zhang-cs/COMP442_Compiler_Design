@@ -94,6 +94,9 @@ public class Lexer {
     }
 
     public Symbol nextToken() throws Exception{
+        if(line == 95) {
+            int debug = 0;
+        }
         String currLexeme;
 
         //remove space and comment
@@ -176,9 +179,7 @@ public class Lexer {
         for(int i = 0; i < longestLexeme.lexeme.length(); i++) {
             buffer.extend();
         }
-        if(buffer.peek() == (char)65535) {
-            return new Symbol("$", "EOF", true);
-        }
+
         buffer.synchPtrBasedOnForwardPtr();
         matchingLexemes.clear();
         dfaInteger.resetDFA(dfaInteger);
@@ -186,6 +187,9 @@ public class Lexer {
         dfaFloat.resetDFA();
         dfaId.resetDFA(dfaId);
         if(longestLexeme.isEmpty()) {
+            if(buffer.peek() == (char)65535) {
+                return new Symbol("$", "EOF", true);
+            }
             return null;
         }
         return longestLexeme;

@@ -1,7 +1,9 @@
 package grammar;
 
+import symbol.Symbol;
+
 public class ASTNode_VarDecl extends AST{
-    String id;
-    String type;
-    ASTNode_DimList dimList;
+    public ASTNode_VarDecl(Symbol s) {
+        super(s);
+    }
 }

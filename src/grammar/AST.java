@@ -1,7 +1,10 @@
 package grammar;
 
+import semantic.SymbolTable;
+import semantic.Visitor;
 import symbol.Symbol;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AST {
@@ -10,6 +13,7 @@ public class AST {
     AST leftMostChild;
     AST rightSibling;
     Symbol nodeSymbol;
+    SymbolTable symTab;
 
     public AST() {
         leftMostSibling = this;
@@ -18,6 +22,22 @@ public class AST {
     public AST(Symbol s) {
         leftMostSibling = this;
         nodeSymbol = s;
+    }
+
+    public SymbolTable getSymTab(){
+        return symTab;
+    }
+
+    public void setSymTab(SymbolTable s) {
+        symTab = s;
+    }
+
+    public void accept(Visitor visitor) {
+
+    }
+
+    public Symbol getNodeSymbol() {
+        return nodeSymbol;
     }
 
     public AST makeSiblings(AST y) {
@@ -65,12 +85,18 @@ public class AST {
 //        return node;
 //    }
 
-    public void makeNode(Symbol s) {
-        nodeSymbol = s;
+    public List<AST> getChildren() {
+        List<AST> children = new ArrayList<>();
+        AST curr = leftMostChild;
+        while(curr != null) {
+            children.add(curr);
+            curr = curr.rightSibling;
+        }
+        return children;
     }
 
-    public Symbol getNodeSymbol() {
-        return nodeSymbol;
+    public void makeNode(Symbol s) {
+        nodeSymbol = s;
     }
 
     public String toString()

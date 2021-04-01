@@ -16,6 +16,8 @@ public class Parser {
     private List<String> derivationRules;
     private List<String> derivationSteps;
     private Stack<AST> semanticRecords;
+    private boolean applySemanticRecords;
+    private boolean enableErrorRecovery;
 
     public Parser(String filePath) throws Exception{
         lexer = new Lexer(filePath);
@@ -26,6 +28,8 @@ public class Parser {
         derivationRules = new ArrayList<>();
         derivationSteps = new ArrayList<>();
         semanticRecords = new Stack<>();
+        applySemanticRecords = true;
+        enableErrorRecovery = false;
     }
 
     public boolean parse() throws Exception{
@@ -61,10 +65,24 @@ public class Parser {
     }
 
     public void showAST() {
+        if(!applySemanticRecords) {
+            return;
+        }
         System.out.println(semanticRecords.pop().toString());
     }
 
+    public AST getAST() throws Exception{
+        if(!applySemanticRecords) {
+            return null;
+        }
+        parse();
+        return semanticRecords.pop();
+    }
+
     private boolean skipError(Symbol LHS) throws Exception {
+        if(!enableErrorRecovery) {
+            return true;
+        }
         Set<Symbol> first = LHS.computeFirstSet(LHS);
         Set<Symbol> follow = LHS.computeFollowSet(LHS, new HashSet<Symbol>());
         //no error
@@ -201,7 +219,10 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(arithExpr);
         if(arithExpr.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<ArithExpr> ::= <Term> <ArithExprTail>
-            if(TERM() && ARITHEXPRTAIL()) {
+            if(
+                TERM()
+                && ARITHEXPRTAIL())
+            {
                 registerDerivation("<ArithExpr> ::= <Term> <ArithExprTail>");
             }
             else {
@@ -221,7 +242,8 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(arithExprTail);
         if(arithExprTail.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<ArithExprTail> ::= <AddOp> <Term> <ArithExprTail>
-            if(ADDOP() && TERM() && ARITHEXPRTAIL()) {
+            if(ADDOP() && TERM() && makeNode(new ASTNode_AddOp(new Symbol("AddOp", false)), 2)
+                    && ARITHEXPRTAIL()) {
                 registerDerivation("<ArithExprTail> ::= <AddOp> <Term> <ArithExprTail>");
             }
             else {
@@ -366,7 +388,8 @@ public class Parser {
         Symbol classMethod = new Symbol("ClassMethod", false);
         if(lookahead.equals(new Symbol("sr", true))) {
             //<ClassMethod> ::= 'sr' 'id'
-            if(match(new Symbol("sr", true)) && match(new Symbol("id", true))) {
+            if(match(new Symbol("sr", true))
+                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))) {
                 registerDerivation("<ClassMethod> ::= 'sr' 'id'");
             }
             else {
@@ -390,7 +413,10 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(expr);
         if(expr.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<Expr> ::= <ArithExpr> <ExprTail>
-            if(ARITHEXPR() && EXPRTAIL()) {
+            if(
+                ARITHEXPR()
+                && EXPRTAIL())
+            {
                 registerDerivation("<Expr> ::= <ArithExpr> <ExprTail>");
             }
             else {
@@ -438,7 +464,7 @@ public class Parser {
             if(markTree()
                 &&markTree() && TYPE()
                 && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
-                && ARRAYSIZEREPT()
+                && markTree() && ARRAYSIZEREPT() && makeTree(new ASTNode_DimList(new Symbol("DimList", false)))
                 && makeTree(new ASTNode_FParam(new Symbol("FParam", false))) && FPARAMSTAIL()
               && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false))))
             {
@@ -467,7 +493,7 @@ public class Parser {
             if( markTree() && match(new Symbol(",", true))
                     && TYPE()
                     && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
-                    && ARRAYSIZEREPT()
+                    && markTree() && ARRAYSIZEREPT() && makeTree(new ASTNode_DimList(new Symbol("DimList", false)))
              && makeTree(new ASTNode_FParam(new Symbol("FParam", false)))
              && FPARAMSTAIL())
             {
@@ -503,7 +529,7 @@ public class Parser {
         }
         else if(lookahead.equals(new Symbol("intnum", true))) {
             //<Factor> ::= 'intnum'
-            if(match(new Symbol("intnum", true))) {
+            if(match(new Symbol("intnum", true)) && makeLeaf(new ASTNode_Int(prevLookahead))) {
                 registerDerivation("<Factor> ::= 'intnum'");
             }
             else {
@@ -512,7 +538,7 @@ public class Parser {
         }
         else if(lookahead.equals(new Symbol("floatnum", true))) {
             //<Factor> ::= 'floatnum'
-            if(match(new Symbol("floatnum", true))) {
+            if(match(new Symbol("floatnum", true)) && makeLeaf(new ASTNode_Float(prevLookahead))) {
                 registerDerivation("<Factor> ::= 'floatnum'");
             }
             else {
@@ -522,7 +548,7 @@ public class Parser {
         else if(lookahead.equals(new Symbol("stringlit", true)))
         {
             //<Factor> ::= 'stringlit'
-            if(match(new Symbol("stringlit", true))) {
+            if(match(new Symbol("stringlit", true)) && makeLeaf(new ASTNode_Str(prevLookahead))) {
                 registerDerivation("<Factor> ::= 'stringlit'");
             }
             else {
@@ -542,7 +568,9 @@ public class Parser {
         else if(lookahead.equals(new Symbol("not", true)))
         {
             //<Factor> ::= 'not' <Factor>
-            if(match(new Symbol("not", true)) && FACTOR()) {
+            if(match(new Symbol("not", true))
+                  &&markTree() && FACTOR() && makeTree(new ASTNode_Factor(new Symbol("Factor", false))))
+            {
                 registerDerivation("<Factor> ::= 'not' <Factor>");
             }
             else {
@@ -551,7 +579,8 @@ public class Parser {
         }
         else if(factor.computeFirstSetForSymbolString(first.get(6)).contains(lookahead)) {
             //<Factor> ::= <Sign> <Factor>
-            if(SIGN() && FACTOR())
+            if(SIGN()
+                  &&markTree() && FACTOR() && makeTree(new ASTNode_Factor(new Symbol("Factor", false))))
             {
                 registerDerivation("<Factor> ::= <Sign> <Factor>");
             }
@@ -582,8 +611,12 @@ public class Parser {
         boolean match = true;
         if(lookahead.equals(new Symbol("{", true))) {
             //<FuncBody> ::= '{' <MethodBodyVar> <StatementList> '}'
-            if(match(new Symbol("{", true)) && METHODBODYVAR()
-                    && STATEMENTLIST() && match(new Symbol("}", true)))
+            if(match(new Symbol("{", true))
+                    && markTree()
+                    && METHODBODYVAR()
+                    && STATEMENTLIST()
+                    && makeTree(new ASTNode_StatBlock(new Symbol("StatBlock", false)))
+               && match(new Symbol("}", true)))
             {
                 registerDerivation("<FuncBody> ::= '{' <MethodBodyVar> <StatementList> '}'");
             }
@@ -638,7 +671,7 @@ public class Parser {
         }
         else if(lookahead.equals(new Symbol("void", true))) {
             //<FuncDeclTail> ::= 'void'
-            if(match(new Symbol("void", true))) {
+            if(match(new Symbol("void", true)) && makeLeaf(new ASTNode_Type(prevLookahead))) {
                 registerDerivation("<FuncDeclTail> ::= 'void'");
             }
             else {
@@ -658,7 +691,9 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(funcDef);
         if(funcDef.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<FuncDef> ::= <Function> <FuncDef>
-            if(FUNCTION() && FUNCDEF()) {
+            if(markTree()
+                    && FUNCTION() && makeTree(new ASTNode_FuncDef(new Symbol("FuncDef", false)))
+               && FUNCDEF()) {
                 registerDerivation("<FuncDef> ::= <Function> <FuncDef>");
             }
             else {
@@ -681,7 +716,9 @@ public class Parser {
         if(lookahead.equals(new Symbol("func", true)))
         {
             //<FuncHead> ::= 'func' 'id' <ClassMethod> '(' <FParams> ')' ':' <FuncDeclTail>
-            if(match(new Symbol("func", true)) && match(new Symbol("id", true)) && CLASSMETHOD()
+            if(match(new Symbol("func", true))
+                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_ScopeSpec(new Symbol("scope", prevLookahead.lexeme, true)))
+                    && CLASSMETHOD()
                     && match(new Symbol("(", true)) && FPARAMS() && match(new Symbol(")", true))
                     && match(new Symbol(":", true)) && FUNCDECLTAIL())
             {
@@ -703,7 +740,11 @@ public class Parser {
         if(lookahead.equals(new Symbol("id", true)))
         {
             //<FuncOrAssignStat> ::= 'id' <FuncOrAssignStatIdnest>
-            if(match(new Symbol("id", true)) && FUNCORASSIGNSTATIDNEST())
+            if(
+                    //makeTree() resides in FUNCORASSIGNSTATIDNESTVARTAIL()
+                    markTree()
+                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    && FUNCORASSIGNSTATIDNEST())
             {
                 registerDerivation("<FuncOrAssignStat> ::= 'id' <FuncOrAssignStatIdnest> ");
             }
@@ -724,7 +765,11 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(funcOrAssignStatIdNest);
         if(funcOrAssignStatIdNest.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<FuncOrAssignStatIdnest> ::= <IndiceRep> <FuncOrAssignStatIdnestVarTail>
-            if(INDICEREP() && FUNCORASSIGNSTATIDNESTVARTAIL())
+            if(
+                    INDICEREP()
+                    && FUNCORASSIGNSTATIDNESTVARTAIL()
+            )
+
             {
                 registerDerivation("<FuncOrAssignStatIdnest> ::= <IndiceRep> <FuncOrAssignStatIdnestVarTail> ");
             }
@@ -794,7 +839,10 @@ public class Parser {
         }
         else if(funcOrAssignStatIdnestVarTail.computeFirstSetForSymbolString(first.get(1)).contains(lookahead)) {
             //<FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail>
-            if(ASSIGNSTATTAIL())
+            if(
+                    //markTree resides in FUNCORASSIGNSTAT()
+                    makeTree(new ASTNode_Var(new Symbol("Var", false)))
+                    && markTree() && ASSIGNSTATTAIL() && makeTree(new ASTNode_Expr(new Symbol("Expr", false))))
             {
                 registerDerivation("<FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail> ");
             }
@@ -813,7 +861,9 @@ public class Parser {
         boolean match = true;
         if(lookahead.equals(new Symbol("id", true))) {
             //<FuncOrVar> ::= 'id' <FuncOrVarIdnest>
-            if(match(new Symbol("id", true)) && FUNCORVARIDNEST()) {
+            if(match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    && FUNCORVARIDNEST())
+            {
                 registerDerivation("<FuncOrVar> ::= 'id' <FuncOrVarIdnest>");
             }
             else {
@@ -973,7 +1023,10 @@ public class Parser {
         if(lookahead.equals(new Symbol("[", true)))
         {
             //<IndiceRep> ::= '[' <Expr> ']' <IndiceRep>
-            if(match(new Symbol("[", true)) && EXPR() && match(new Symbol("]", true)) && INDICEREP())
+            if(match(new Symbol("[", true))
+                    && EXPR()
+                    && match(new Symbol("]", true))
+                    && INDICEREP())
             {
                 registerDerivation("<IndiceRep> ::= '[' <Expr> ']' <IndiceRep>");
             }
@@ -1026,7 +1079,7 @@ public class Parser {
         Symbol intNum = new Symbol("IntNum", false);
         if(lookahead.equals(new Symbol("intnum", true))) {
             //<IntNum> ::= 'intnum'
-            if(match(new Symbol("intnum", true))) {
+            if(match(new Symbol("intnum", true)) && makeLeaf(new ASTNode_Int(prevLookahead))) {
                 registerDerivation("<IntNum> ::= 'intnum'");
             }
             else {
@@ -1059,7 +1112,7 @@ public class Parser {
         }
         else if(memberDecl.computeFirstSetForSymbolString(first.get(1)).contains(lookahead)) {
             //<MemberDecl> ::= <VarDecl>
-            if(VARDECL())
+            if(markTree() && VARDECL() && makeTree(new ASTNode_VarDecl(new Symbol("VarDecl", false))))
             {
                 registerDerivation("<MemberDecl> ::= <VarDecl>");
             }
@@ -1329,7 +1382,8 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(statement);
         if(statement.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<Statement> ::= <FuncOrAssignStat> ';'
-            if(FUNCORASSIGNSTAT() && match(new Symbol(";", true))) {
+            if(markTree() && FUNCORASSIGNSTAT() && makeTree(new ASTNode_AssignStat(new Symbol("AssignStat", false)))
+                  && match(new Symbol(";", true))) {
                 registerDerivation("<Statement> ::= <FuncOrAssignStat> ';'");
             }
             else {
@@ -1338,9 +1392,15 @@ public class Parser {
         }
         else if(lookahead.equals(new Symbol("if", true))) {
             //<Statement> ::= 'if' '(' <Expr> ')' 'then' <StatBlock> 'else' <StatBlock> ';'
-            if(match(new Symbol("if", true)) && match(new Symbol("(", true)) && EXPR()
-                    && match(new Symbol(")", true)) && match(new Symbol("then", true)) && STATBLOCK()
-                    && match(new Symbol("else", true)) && STATBLOCK() && match(new Symbol(";", true)))
+            if(markTree() && match(new Symbol("if", true))
+                    && match(new Symbol("(", true))
+                    && markTree() && EXPR() && makeTree(new ASTNode_RelExpr(new Symbol("RelExpr", false)))
+                    && match(new Symbol(")", true)) && match(new Symbol("then", true))
+                    && markTree() && STATBLOCK() && makeTree(new ASTNode_StatBlock(new Symbol("StatBlock", false)))
+                    && match(new Symbol("else", true))
+                    && markTree() && STATBLOCK() && makeTree(new ASTNode_StatBlock(new Symbol("StatBlock", false)))
+                    && match(new Symbol(";", true))
+              && makeTree(new ASTNode_IfStat(new Symbol("IfStat", false))))
             {
                 registerDerivation("<Statement> ::= 'if' '(' <Expr> ')' 'then' <StatBlock> 'else' <StatBlock> ';'");
             }
@@ -1383,7 +1443,8 @@ public class Parser {
         }
         else if(lookahead.equals(new Symbol("return", true))) {
             //<Statement> ::= 'return' '(' <Expr> ')' ';'
-            if(match(new Symbol("return", true)) && match(new Symbol("(", true)) && EXPR()
+            if(match(new Symbol("return", true)) && match(new Symbol("(", true))
+                    && EXPR() && makeNode(new ASTNode_ReturnStat(new Symbol("ReturnStat", false)), 1)
                     && match(new Symbol(")", true)) && match(new Symbol(";", true)))
             {
                 registerDerivation("<Statement> ::= 'return' '(' <Expr> ')' ';'");
@@ -1423,7 +1484,7 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(statementList);
         if(statementList.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<StatementList> ::= <Statement> <StatementList>
-            if(STATEMENT() && STATEMENTLIST()) {
+            if(markTree() && STATEMENT() && makeTree(new ASTNode_Stat(new Symbol("Stat", false))) && STATEMENTLIST()) {
                 registerDerivation("<StatementList> ::= <Statement> <StatementList>");
             }
             else {
@@ -1447,7 +1508,11 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(term);
         if(term.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<Term> ::= <Factor> <TermTail>
-            if(FACTOR() && TERMTAIL()) {
+            if(
+                   FACTOR()
+                   && TERMTAIL()
+            )
+            {
                 registerDerivation("<Term> ::= <Factor> <TermTail>");
             }
             else {
@@ -1467,7 +1532,11 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(termTail);
         if(termTail.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<TermTail> ::= <MultOp> <Factor> <TermTail>
-            if(MULTOP() && FACTOR() && TERMTAIL()) {
+            if(
+                  MULTOP()
+                  && FACTOR() && makeNode(new ASTNode_MultOp(new Symbol("MultOp", prevLookahead.lexeme, false)), 2)
+                  && TERMTAIL())
+            {
                 registerDerivation("<TermTail> ::= <MultOp> <Factor> <TermTail>");
             }
             else {
@@ -1536,7 +1605,11 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(varDecl);
         if(varDecl.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<VarDecl> ::= <Type> 'id' <ArraySizeRept> ';'
-            if(TYPE() && match(new Symbol("id", true)) && ARRAYSIZEREPT() && match(new Symbol(";", true))) {
+            if(TYPE()
+                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    && markTree() && ARRAYSIZEREPT() && makeTree(new ASTNode_DimList(new Symbol("DimList", false)))
+               && match(new Symbol(";", true)))
+            {
                 registerDerivation("<VarDecl> ::= <Type> 'id' <ArraySizeRept> ';'");
             }
             else {
@@ -1556,7 +1629,8 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(varDeclRep);
         if(varDeclRep.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<VarDeclRep> ::= <VarDecl> <VarDeclRep>
-            if(VARDECL() && VARDECLREP()) {
+            if(markTree() && VARDECL() && makeTree(new ASTNode_VarDecl(new Symbol("VarDecl", false)))
+                    && VARDECLREP()) {
                 registerDerivation("<VarDeclRep> ::= <VarDecl> <VarDeclRep>");
             }
             else {
@@ -1579,7 +1653,8 @@ public class Parser {
         if(lookahead.equals(new Symbol("id", true)))
         {
             //<Variable> ::= 'id' <VariableIdnest>
-            if(match(new Symbol("id", true)) && VARIABLEIDNEST()) {
+            if(markTree() && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    && VARIABLEIDNEST() && makeTree(new ASTNode_Var(new Symbol("Var", false)))) {
                 registerDerivation("<Variable> ::= 'id' <VariableIdnest>");
             }
             else {
@@ -1599,7 +1674,10 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(variableIdnest);
         if(variableIdnest.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<VariableIdnest> ::= <IndiceRep> <VariableIdnestTail>
-            if(markTree() && INDICEREP()  && VARIABLEIDNESTTAIL()) {
+            if(
+                    markTree() && INDICEREP() && makeTree(new ASTNode_IndiceList(new Symbol("IndiceList", false)))
+                            && VARIABLEIDNESTTAIL())
+            {
                 registerDerivation("<VariableIdnest> ::= <IndiceRep> <VariableIdnestTail>");
             }
             else {
@@ -1684,16 +1762,36 @@ public class Parser {
     }
 
     private boolean makeLeaf(AST ast) {
+        if(!applySemanticRecords) {
+            return true;
+        }
         semanticRecords.push(ast);
         return true;
     }
 
-    private boolean makeNode(AST ast) {
+    private boolean makeNode(AST ast, int numNode) {
+        if(!applySemanticRecords) {
+            return true;
+        }
+        for(int i = 0; i < numNode; i++) {
+            ast.adoptChildren(semanticRecords.pop());
+        }
         semanticRecords.push(ast);
+        return true;
+    }
+
+    private boolean markTree() {
+        if(!applySemanticRecords) {
+            return true;
+        }
+        semanticRecords.push(null);
         return true;
     }
 
     private boolean makeTree(AST ast) {
+        if(!applySemanticRecords) {
+            return true;
+        }
         AST child = semanticRecords.pop();
         while(child != null) {
             ast.adoptChildren(child);
@@ -1716,15 +1814,6 @@ public class Parser {
         while(!q.isEmpty()) {
             semanticRecords.push(q.remove());
         }
-        return true;
-    }
-
-//    private boolean makeTree(Symbol s, int n) {
-//        return true;
-//    }
-
-    private boolean markTree() {
-        semanticRecords.push(null);
         return true;
     }
 }

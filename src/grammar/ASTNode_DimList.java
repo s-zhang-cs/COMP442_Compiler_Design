@@ -1,7 +1,9 @@
 package grammar;
 
-import java.util.List;
+import symbol.Symbol;
 
 public class ASTNode_DimList extends AST{
-    List<Integer> dimensions;
+    public ASTNode_DimList(Symbol s) {
+        super(s);
+    }
 }
