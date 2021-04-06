@@ -41,6 +41,7 @@ public class Parser {
             }
             derivationOutput.close();
             derivationErrorOutput.close();
+            System.out.println("Successfully parsed the source code.");
             return true;
         }
         processDerivation();
@@ -693,8 +694,8 @@ public class Parser {
             //<FuncDef> ::= <Function> <FuncDef>
             if(markTree()
                     && FUNCTION() && makeTree(new ASTNode_FuncDef(new Symbol("FuncDef", false)))
-               && FUNCDEF()) {
-                registerDerivation("<FuncDef> ::= <Function> <FuncDef>");
+                    && FUNCDEF()) {
+               registerDerivation("<FuncDef> ::= <Function> <FuncDef>");
             }
             else {
                 match = false;
@@ -805,7 +806,11 @@ public class Parser {
         Symbol funcOrAssignStatIdnestFuncTail = new Symbol("FuncOrAssignStatIdnestFuncTail", false);
         if(lookahead.equals(new Symbol(".", true))) {
             //<FuncOrAssignStatIdnestFuncTail> ::= '.' 'id' <FuncStatTail>
-            if(match(new Symbol(".", true)) && match(new Symbol("id", true)) && FUNCSTATTAIL()) {
+            if( //markTree resides in FUNCORASSIGNSTAT()
+                makeTree(new ASTNode_FuncDef(new Symbol("FuncDef", false)))
+                    && match(new Symbol(".", true))
+                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    && FUNCSTATTAIL()) {
                 registerDerivation("<FuncOrAssignStatIdnestFuncTail> ::= '.' 'id' <FuncStatTail> ");
             }
             else {
@@ -1227,7 +1232,7 @@ public class Parser {
                     && markTree() && CLASSDECL() && makeTree(new ASTNode_ClassList(new Symbol("ClassList", false)))
                     && markTree() && FUNCDEF() && makeTree(new ASTNode_FuncDefList(new Symbol("FuncDefList", false)))
                     && match(new Symbol("main", true))
-                    && FUNCBODY()
+                    && markTree() && FUNCBODY() && makeTree(new ASTNode_FuncMain(new Symbol("FuncMain", false)))
                && makeTree(new ASTNode_Prog(new Symbol("Prog", false))))
             {
                 registerDerivation("<Prog> ::= <ClassDecl> <FuncDef> 'main' <FuncBody>");

@@ -1,0 +1,49 @@
+LINEAR_evaluate:
+name: x | kind: PARAMETER | type: float
+name: hello | kind: VARIABLE | type: int
+name: result | kind: VARIABLE | type: float
+
+QUADRATIC_evaluate:
+name: x | kind: PARAMETER | type: float
+name: result | kind: VARIABLE | type: float
+
+QUADRATIC:
+name: evaluate | kind: FUNCTION | returnType: float
+name: build | kind: FUNCTION | returnType: QUADRATIC
+name: c | kind: VARIABLE | type: float
+name: b | kind: VARIABLE | type: float
+name: a | kind: VARIABLE | type: float
+
+LINEAR_nodefinition:
+name: x | kind: PARAMETER | type: float
+
+QUADRATIC_build:
+name: C | kind: PARAMETER | type: float
+name: B | kind: PARAMETER | type: float
+name: A | kind: PARAMETER | type: float
+
+POLYNOMIAL_evaluate:
+name: x | kind: PARAMETER | type: float
+
+POLYNOMIAL:
+name: evaluate | kind: FUNCTION | returnType: float
+
+Global_main:
+
+LINEAR:
+name: evaluate | kind: FUNCTION | returnType: float
+name: build | kind: FUNCTION | returnType: LINEAR
+name: b | kind: VARIABLE | type: float
+name: a | kind: VARIABLE | type: float
+
+LINEAR_build:
+name: B | kind: PARAMETER | type: float
+name: A | kind: PARAMETER | type: float
+name: new_function | kind: VARIABLE | type: LINEAR
+
+Global:
+name: QUADRATIC | kind: CLASS | inherList: POLYNOMIAL 
+name: LINEAR | kind: CLASS | inherList: POLYNOMIAL 
+name: POLYNOMIAL | kind: CLASS
+name: Global_main | kind: FUNCTION
+

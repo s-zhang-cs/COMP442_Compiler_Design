@@ -1,23 +1,19 @@
 package grammar;
 
-import semantic.SymTabEntry;
 import semantic.SymTabEntryClass;
+import semantic.SymTabEntryMain;
 import semantic.Visitor;
 import symbol.Symbol;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ASTNode_FuncMain extends AST{
+    SymTabEntryMain symTabEntry;
 
-public class ASTNode_ClassDecl extends AST{
-
-    SymTabEntryClass symTabEntry;
-
-    public ASTNode_ClassDecl(Symbol s) {
-       super(s);
-       symTabEntry = new SymTabEntryClass();
+    ASTNode_FuncMain(Symbol s) {
+        super(s);
+        symTabEntry = new SymTabEntryMain();
     }
 
-    public SymTabEntryClass getSymTabEntry() {
+    public SymTabEntryMain getSymTabEntry() {
         return symTabEntry;
     }
 

@@ -1,9 +1,8 @@
 package semantic;
 
-import grammar.AST;
-import grammar.ASTNode_ClassDecl;
-import grammar.ASTNode_FuncDef;
-import grammar.ASTNode_VarDecl;
+import symbol.Symbol;
+
+import java.util.Objects;
 
 public class SymTabEntry {
 
@@ -17,26 +16,26 @@ public class SymTabEntry {
     String name;
     Kind kind;
 
-
     public SymTabEntry(Kind kind) {
         this.kind = kind;
-//        if(node instanceof ASTNode_ClassDecl) {
-//            kind = kind.CLASS;
-//        }
-//        else if(node instanceof ASTNode_FuncDef) {
-//            kind = kind.FUNCTION;
-//        }
-//        else if(node instanceof ASTNode_VarDecl) {
-//            kind = kind.VARIABLE;
-//        }
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String toString() {
-        return name + " | " +  kind;
+        return "name: " + name + " | " +  "kind: " + kind;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) {
+            return true;
+        }
+        else if(o instanceof SymTabEntry) {
+            SymTabEntry s = (SymTabEntry) o;
+            if(s.name.equals(this.name) && s.kind == this.kind) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

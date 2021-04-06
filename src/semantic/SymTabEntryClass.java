@@ -1,9 +1,26 @@
 package semantic;
 
-import grammar.AST;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SymTabEntryClass extends SymTabEntry{
-    public SymTabEntryClass(Kind kind) {
-        super(kind);
+
+    List<String> inherList;
+
+    public SymTabEntryClass() {
+        super(Kind.CLASS);
+        inherList = new ArrayList<>();
+    }
+
+    public String toString() {
+        String str = super.toString();
+        if(!inherList.isEmpty()) {
+            str += " | inherList: ";
+        }
+        for(String s : inherList) {
+            str += s + " ";
+        }
+        return str;
     }
 }
+

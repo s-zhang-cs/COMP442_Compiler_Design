@@ -1,10 +1,11 @@
 package semantic;
-import grammar.ASTNode_ClassDecl;
-import grammar.ASTNode_FuncDef;
-import grammar.ASTNode_Prog;
+import grammar.*;
 
 public interface Visitor {
-    public void visit(ASTNode_Prog prog);
-    public void visit(ASTNode_ClassDecl classDecl);
-    public void visit(ASTNode_FuncDef funcDef);
+    public void visit(ASTNode_Prog prog) throws Exception;
+    public void visit(ASTNode_ClassDecl classDecl) throws Exception;
+    public void visit(ASTNode_FuncDef funcDef) throws Exception;
+    public void visit(ASTNode_VarDecl varDecl);
+    public void visit(ASTNode_FParam fParam);
+    public void visit(ASTNode_FuncMain funcMain);
 }

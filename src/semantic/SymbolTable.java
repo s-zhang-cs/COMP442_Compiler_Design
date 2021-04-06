@@ -12,6 +12,10 @@ public class SymbolTable {
         entries = new ArrayList<SymTabEntry>();
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void addEntry(SymTabEntry entry) {
         entries.add(entry);
     }
@@ -22,5 +26,9 @@ public class SymbolTable {
             res += s.toString() + "\n";
         }
         return res;
+    }
+
+    public boolean containsValue(SymTabEntry s) {
+        return entries.contains(s);
     }
 }

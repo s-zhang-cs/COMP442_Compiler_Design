@@ -1,11 +1,14 @@
 package grammar;
 
+import semantic.SymTabEntry;
 import semantic.SymbolTable;
 import semantic.Visitor;
 import symbol.Symbol;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class AST {
     AST parent;
@@ -14,6 +17,9 @@ public class AST {
     AST rightSibling;
     Symbol nodeSymbol;
     SymbolTable symTab;
+    //only used by root node
+    Map<String, SymbolTable> symTabs;
+
 
     public AST() {
         leftMostSibling = this;
@@ -24,16 +30,49 @@ public class AST {
         nodeSymbol = s;
     }
 
+    public AST getParent() {
+        return parent;
+    };
+
     public SymbolTable getSymTab(){
         return symTab;
+    }
+
+    //to be overwritten by children classes (class, func, var)
+    public SymTabEntry getSymTabEntry() {
+        return null;
     }
 
     public void setSymTab(SymbolTable s) {
         symTab = s;
     }
 
-    public void accept(Visitor visitor) {
+    public Map<String, SymbolTable> getSymTabs() {
+        return symTabs;
+    }
 
+    public void setSymTabs(SymbolTable s) {
+        symTabs.put(s.getName(), s);
+    }
+
+//    public void recordSymTabs() {
+//        for(SymbolTable s : symTabs.values()) {
+//            System.out.println(s.toString());
+//        }
+//    }
+
+    public void accept(Visitor visitor) throws Exception {
+        for (AST child : this.getChildren() ) {
+            child.accept(visitor);
+        }
+    }
+
+    public AST getRoot() {
+        AST root = this;
+        while(root.parent != null) {
+            root = root.parent;
+        }
+        return root;
     }
 
     public Symbol getNodeSymbol() {

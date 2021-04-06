@@ -1,19 +1,21 @@
 package grammar;
 
+import semantic.SymbolTable;
 import semantic.Visitor;
 import symbol.Symbol;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ASTNode_Prog extends AST{
-    ASTNode_ClassList classList;
 
     public ASTNode_Prog(Symbol s) {
         super(s);
+        symTabs = new HashMap<>();
     }
 
-    public void accept(Visitor visitor) {
+    @Override
+    public void accept(Visitor visitor) throws Exception {
         for (AST child : this.getChildren() ) {
             child.accept(visitor);
         }

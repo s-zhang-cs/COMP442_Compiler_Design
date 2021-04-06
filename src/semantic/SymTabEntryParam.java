@@ -1,10 +1,10 @@
 package semantic;
 
-public class SymTabEntryVar extends SymTabEntry{
+public class SymTabEntryParam extends SymTabEntry{
     String type;
 
-    public SymTabEntryVar() {
-        super(Kind.VARIABLE);
+    public SymTabEntryParam() {
+        super(Kind.PARAMETER);
     }
 
     public String toString() {
