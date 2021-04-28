@@ -3,8 +3,8 @@ package grammar;
 import semantic.Visitor;
 import symbol.Symbol;
 
-public class ASTNode_Factor extends AST{
-    public ASTNode_Factor(Symbol s) {
+public class ASTNode_RelOp extends AST {
+    public ASTNode_RelOp(Symbol s) {
         super(s);
     }
 

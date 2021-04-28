@@ -1,49 +1,56 @@
-LINEAR_evaluate:
-name: x | kind: PARAMETER | type: float
-name: hello | kind: VARIABLE | type: int
-name: result | kind: VARIABLE | type: float
+[QUADRATIC]:
+name: evaluate(QUADRATIC) | kind: FUNCTION | memSize: 0 | memOffset: 0 | link: QUADRATIC_EVALUATE | returnType: float
+name: build(QUADRATIC) | kind: FUNCTION | memSize: 0 | memOffset: 0 | link: QUADRATIC_BUILD | returnType: QUADRATIC
+name: c(QUADRATIC) | kind: VARIABLE | memSize: 8 | memOffset: 0 | link: null | type: float
+name: b(QUADRATIC) | kind: VARIABLE | memSize: 8 | memOffset: 0 | link: null | type: float
+name: a(QUADRATIC) | kind: VARIABLE | memSize: 8 | memOffset: 0 | link: null | type: float
 
-QUADRATIC_evaluate:
-name: x | kind: PARAMETER | type: float
-name: result | kind: VARIABLE | type: float
+[LINEAR_EVALUATE]:
+name: x(LINEAR_EVALUATE) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
+name: result(LINEAR_EVALUATE) | kind: VARIABLE | memSize: 8 | memOffset: -8 | link: null | type: float
 
-QUADRATIC:
-name: evaluate | kind: FUNCTION | returnType: float
-name: build | kind: FUNCTION | returnType: QUADRATIC
-name: c | kind: VARIABLE | type: float
-name: b | kind: VARIABLE | type: float
-name: a | kind: VARIABLE | type: float
+[POLYNOMIAL_EVALUATE]:
+name: x(POLYNOMIAL_EVALUATE) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
 
-LINEAR_nodefinition:
-name: x | kind: PARAMETER | type: float
+[POLYNOMIAL]:
+name: evaluate(POLYNOMIAL) | kind: FUNCTION | memSize: 0 | memOffset: 0 | link: POLYNOMIAL_EVALUATE | returnType: float
 
-QUADRATIC_build:
-name: C | kind: PARAMETER | type: float
-name: B | kind: PARAMETER | type: float
-name: A | kind: PARAMETER | type: float
+[GLOBAL]:
+name: QUADRATIC(GLOBAL) | kind: CLASS | memSize: 0 | memOffset: 0 | link: QUADRATIC | inherList: POLYNOMIAL 
+name: LINEAR(GLOBAL) | kind: CLASS | memSize: 0 | memOffset: 0 | link: LINEAR | inherList: POLYNOMIAL 
+name: POLYNOMIAL(GLOBAL) | kind: CLASS | memSize: 0 | memOffset: 0 | link: POLYNOMIAL
+name: GLOBAL_MAIN(GLOBAL) | kind: FUNCTION | memSize: -52 | memOffset: 0 | link: GLOBAL_MAIN | returnType: null
 
-POLYNOMIAL_evaluate:
-name: x | kind: PARAMETER | type: float
+[QUADRATIC_BUILD]:
+name: C(QUADRATIC_BUILD) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
+name: B(QUADRATIC_BUILD) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
+name: A(QUADRATIC_BUILD) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
+name: new_function(QUADRATIC_BUILD) | kind: VARIABLE | memSize: 0 | memOffset: 0 | link: QUADRATIC | type: QUADRATIC
 
-POLYNOMIAL:
-name: evaluate | kind: FUNCTION | returnType: float
+[QUADRATIC_EVALUATE]:
+name: x(QUADRATIC_EVALUATE) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
+name: result(QUADRATIC_EVALUATE) | kind: VARIABLE | memSize: 8 | memOffset: -8 | link: null | type: float
 
-Global_main:
+[LINEAR_BUILD]:
+name: B(LINEAR_BUILD) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
+name: A(LINEAR_BUILD) | kind: PARAMETER | memSize: 0 | memOffset: 0 | link: null | type: float
+name: new_function(LINEAR_BUILD) | kind: VARIABLE | memSize: 0 | memOffset: 0 | link: LINEAR | type: LINEAR
 
-LINEAR:
-name: evaluate | kind: FUNCTION | returnType: float
-name: build | kind: FUNCTION | returnType: LINEAR
-name: b | kind: VARIABLE | type: float
-name: a | kind: VARIABLE | type: float
+[LINEAR]:
+name: evaluate(LINEAR) | kind: FUNCTION | memSize: 0 | memOffset: 0 | link: LINEAR_EVALUATE | returnType: float
+name: build(LINEAR) | kind: FUNCTION | memSize: 0 | memOffset: 0 | link: LINEAR_BUILD | returnType: LINEAR
+name: b(LINEAR) | kind: VARIABLE | memSize: 8 | memOffset: 0 | link: null | type: float
+name: a(LINEAR) | kind: VARIABLE | memSize: 8 | memOffset: 0 | link: null | type: float
 
-LINEAR_build:
-name: B | kind: PARAMETER | type: float
-name: A | kind: PARAMETER | type: float
-name: new_function | kind: VARIABLE | type: LINEAR
-
-Global:
-name: QUADRATIC | kind: CLASS | inherList: POLYNOMIAL 
-name: LINEAR | kind: CLASS | inherList: POLYNOMIAL 
-name: POLYNOMIAL | kind: CLASS
-name: Global_main | kind: FUNCTION
+[GLOBAL_MAIN]:
+name: t1(GLOBAL_MAIN) | kind: LITVAL | memSize: 4 | memOffset: -8 | link: null | value: 10
+name: t2(GLOBAL_MAIN) | kind: LITVAL | memSize: 4 | memOffset: -12 | link: null | value: 1
+name: t3(GLOBAL_MAIN) | kind: LITVAL | memSize: 8 | memOffset: -20 | link: null | value: 0.0
+name: t4(GLOBAL_MAIN) | kind: LITVAL | memSize: 8 | memOffset: -28 | link: null | value: 1.0
+name: t5(GLOBAL_MAIN) | kind: LITVAL | memSize: 8 | memOffset: -36 | link: null | value: 2.0
+name: t6(GLOBAL_MAIN) | kind: LITVAL | memSize: 8 | memOffset: -44 | link: null | value: 3.5
+name: t7(GLOBAL_MAIN) | kind: LITVAL | memSize: 4 | memOffset: -48 | link: null | value: 2
+name: counter(GLOBAL_MAIN) | kind: VARIABLE | memSize: 4 | memOffset: -52 | link: null | type: integer
+name: f2(GLOBAL_MAIN) | kind: VARIABLE | memSize: 0 | memOffset: -52 | link: QUADRATIC | type: quadratic
+name: f1(GLOBAL_MAIN) | kind: VARIABLE | memSize: 0 | memOffset: -52 | link: LINEAR | type: linear
 

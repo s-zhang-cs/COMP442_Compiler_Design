@@ -5,6 +5,7 @@ import semantic.Visitor;
 import symbol.Symbol;
 
 public class ASTNode_FParam extends AST{
+
     SymTabEntryParam symTabEntry;
 
     public ASTNode_FParam(Symbol s) {
@@ -12,15 +13,18 @@ public class ASTNode_FParam extends AST{
         symTabEntry = new SymTabEntryParam();
     }
 
+    @Override
     public SymTabEntryParam getSymTabEntry() {
         return symTabEntry;
     }
 
     @Override
     public void accept(Visitor visitor) throws Exception {
+        visitor.preVisit(this);
         for (AST child : this.getChildren() ) {
             child.accept(visitor);
         }
         visitor.visit(this);
     }
+
 }

@@ -1,12 +1,8 @@
 package grammar;
 
-import semantic.SymTabEntry;
 import semantic.SymTabEntryClass;
 import semantic.Visitor;
 import symbol.Symbol;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ASTNode_ClassDecl extends AST{
 
@@ -17,15 +13,18 @@ public class ASTNode_ClassDecl extends AST{
        symTabEntry = new SymTabEntryClass();
     }
 
+    @Override
     public SymTabEntryClass getSymTabEntry() {
         return symTabEntry;
     }
 
     @Override
     public void accept(Visitor visitor) throws Exception {
+        visitor.preVisit(this);
         for (AST child : this.getChildren() ) {
             child.accept(visitor);
         }
         visitor.visit(this);
     }
+
 }

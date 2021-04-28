@@ -1,7 +1,5 @@
 package grammar;
 
-import semantic.SymTabEntry;
-import semantic.SymTabEntryClass;
 import semantic.SymTabEntryVar;
 import semantic.Visitor;
 import symbol.Symbol;
@@ -20,6 +18,7 @@ public class ASTNode_VarDecl extends AST{
 
     @Override
     public void accept(Visitor visitor) throws Exception {
+        visitor.preVisit(this);
         for (AST child : this.getChildren() ) {
             child.accept(visitor);
         }

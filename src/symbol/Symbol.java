@@ -49,6 +49,12 @@ public class Symbol {
         else if(this.symbol.equals(">")) {
             this.symbol = "gt";
         }
+        else if(this.symbol.equals("!")) {
+            this.symbol = "not";
+        }
+        else if(this.symbol.equals("String")) {
+            this.symbol = "stringlit";
+        }
     }
 
     public boolean isEmpty() {

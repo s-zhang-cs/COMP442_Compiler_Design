@@ -11,6 +11,7 @@ public class ParserTest {
 
         Parser parser = new Parser("resources/lexer/polynomial.src");
         System.out.println(parser.parse());
+        //System.out.println(parser.recursiveDescentParse(new Symbol("PROG", false)));
         parser.showAST();
     }
 }

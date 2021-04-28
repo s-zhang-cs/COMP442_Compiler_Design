@@ -94,9 +94,6 @@ public class Lexer {
     }
 
     public Symbol nextToken() throws Exception{
-        if(line == 95) {
-            int debug = 0;
-        }
         String currLexeme;
 
         //remove space and comment

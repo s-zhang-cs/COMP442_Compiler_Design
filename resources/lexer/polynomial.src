@@ -1,9 +1,6 @@
 // ====== Class declarations ====== //
 class POLYNOMIAL {
-	public func evaluate(float x, float x) : float;
-};
-class POLYNOMIAL {
-	public func evaluate(float x[1][2]) : float;
+	public func evaluate(float x) : float;
 };
 
 class LINEAR inherits POLYNOMIAL {
@@ -13,23 +10,6 @@ class LINEAR inherits POLYNOMIAL {
 	public func build(float A, float B) : LINEAR;
 	public func evaluate(float x) : float;
 };
-class LINEAR inherits POLYNOMIAL {
-	private float a;
-	private float b;
-	private float b;
-
-	public func build(float A, float B) : LINEAR;
-	public func build(float A, float B) : LINEAR;
-	public func evaluate(float x) : float;
-};
-class LINEAR inherits POLYNOMIAL {
-	private float a;
-	private float b;
-
-	public func build(float A, float B) : LINEAR;
-	public func nodefinition(float x) : float;
-};
-
 
 class QUADRATIC inherits POLYNOMIAL {
 	private float a;
@@ -51,7 +31,6 @@ func LINEAR::evaluate(float x) : float
   var
   {
     float result;
-    int hello;
   }
   result = 0.0;
   result = a * x + b;
@@ -82,7 +61,7 @@ func LINEAR::build(float A, float B) : LINEAR
   return (new_function);
 }
 
-func QUADRATIC::nodefinition(float A, float B, float C) : QUADRATIC
+func QUADRATIC::build(float A, float B, float C) : QUADRATIC
 {
   var
   {
@@ -94,17 +73,6 @@ func QUADRATIC::nodefinition(float A, float B, float C) : QUADRATIC
   return (new_function);
 }
 
-func NODEFINITION::build(float A, float B, float C) : QUADRATIC
-{
-  var
-  {
-    QUADRATIC new_function;
-  }
-  new_function.a = A;
-  new_function.b = B;
-  new_function.c = C;
-  return (new_function);
-}
 
 // ====== main ====== //
 main

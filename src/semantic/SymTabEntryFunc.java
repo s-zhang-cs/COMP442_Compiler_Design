@@ -3,8 +3,16 @@ package semantic;
 public class SymTabEntryFunc extends SymTabEntry{
     String returnType;
 
-    public SymTabEntryFunc(Kind kind) {
-        super(kind);
+    public SymTabEntryFunc() {
+        super(Kind.FUNCTION);
+    }
+
+    public String getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 
     public String toString() {

@@ -1,9 +1,1 @@
-[SEMANTIC ERROR]duplicate entry for: name: build | kind: FUNCTION | returnType: LINEAR (Class LINEAR)
-[SEMANTIC ERROR]duplicate entry for: name: b | kind: VARIABLE | type: float (Class LINEAR)
-[SEMANTIC ERROR]duplicate entry for: name: x | kind: PARAMETER | type: float (Function evaluate)
-[SEMANTIC ERROR]duplicate entry for: name: LINEAR | kind: CLASS | inherList: POLYNOMIAL  (Global level)
-[SEMANTIC ERROR]duplicate entry for: name: LINEAR | kind: CLASS | inherList: POLYNOMIAL  (Global level)
-[SEMANTIC ERROR]duplicate entry for: name: POLYNOMIAL | kind: CLASS (Global level)
-[SEMANTIC ERROR]no declaration provided for function: NODEFINITION::build.
-[SEMANTIC ERROR]no declaration provided for function: QUADRATIC::nodefinition.
-[SEMANTIC ERROR]no definition provided for function: LINEAR::nodefinition.
+[SEMANTIC ERROR]duplicate entry for: name: b(LINEAR) | kind: VARIABLE | memSize: 8 | memOffset: 0 | link: null | type: float (Class LINEAR)

@@ -12,6 +12,10 @@ public class SymTabEntryClass extends SymTabEntry{
         inherList = new ArrayList<>();
     }
 
+    public List<String> getInherList() {
+        return inherList;
+    }
+
     public String toString() {
         String str = super.toString();
         if(!inherList.isEmpty()) {
