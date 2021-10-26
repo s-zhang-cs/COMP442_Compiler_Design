@@ -54,7 +54,6 @@ public class Parser {
     }
 
     public boolean recursiveDescentParse(Symbol startSymbol) throws Exception{
-
         boolean RHSNullable = false;
         //all the branches of form if(lookahead belongs to FIRST(RHS))
         for (List<Symbol> RHS : Grammar.productions.get(startSymbol)) {
@@ -105,6 +104,10 @@ public class Parser {
 
     public void showAST() {
         if(!applySemanticRecords) {
+            return;
+        }
+        if(semanticRecords.empty()) {
+            System.out.println("No AST is present. Did you parse?");
             return;
         }
         System.out.println(semanticRecords.pop().toString());
@@ -328,12 +331,13 @@ public class Parser {
         return match;
     }
 
+    //
     public boolean ASSIGNOP() throws Exception {
         if(!skipError(new Symbol("AssignOp", false))) return false;
         boolean match = true;
         if(lookahead.equals(new Symbol("assign", true))) {
             //<AssignOp> ::= 'assign'
-            if(match(new Symbol("assign", true))) {
+            if(match(new Symbol("assign", true)) ) {
                 registerDerivation("<AssignOp> ::= 'assign'");
             }
             else {
@@ -976,7 +980,7 @@ public class Parser {
                     match(new Symbol("(", true))
                     && markTree() && APARAMS() && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false))) && migrateAndMakeNode(0, 1)
                     && match(new Symbol(")", true))
-                    && FUNCORVARIDNESTTAIL())
+                    && FUNCORVARIDNESTTAIL() )
             {
                 registerDerivation("<FuncOrVarIdnest> ::= '(' <AParams> ')' <FuncOrVarIdnestTail>");
             }
@@ -1931,10 +1935,13 @@ public class Parser {
         if(!applySemanticRecords) {
             return true;
         }
-        AST child = semanticRecords.pop();
-        while(child != null) {
-            ast.adoptChildren(child);
-            child = semanticRecords.pop();
+        Stack<AST> st = new Stack<>();
+        AST i;
+        while((i = semanticRecords.pop())!= null) {
+            st.push(i);
+        }
+        while(!st.empty()) {
+            ast.adoptChildren(st.pop());
         }
         semanticRecords.push(ast);
         return true;

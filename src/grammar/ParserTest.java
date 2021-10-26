@@ -1,7 +1,5 @@
 package grammar;
 
-import symbol.Symbol;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 
@@ -10,8 +8,7 @@ public class ParserTest {
         Grammar.initialize(new BufferedReader(new FileReader("resources/grammar/LL1.paquet.grm")));
 
         Parser parser = new Parser("resources/lexer/polynomial.src");
-        System.out.println(parser.parse());
-        //System.out.println(parser.recursiveDescentParse(new Symbol("PROG", false)));
+        parser.parse();
         parser.showAST();
     }
 }

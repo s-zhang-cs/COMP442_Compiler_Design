@@ -1,13 +1,10 @@
 package grammar;
 
-import semantic.SymTabEntry;
-import semantic.SymbolTable;
 import semantic.Visitor;
 import symbol.Symbol;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class AST {
     AST parent;
@@ -15,10 +12,6 @@ public class AST {
     AST leftMostChild;
     AST rightSibling;
     Symbol nodeSymbol;
-    SymTabEntry symTabEntry;
-    SymbolTable symTab;
-    //only used by root node
-    Map<String, SymbolTable> symTabMap;
 
     public AST() {
         leftMostSibling = this;
@@ -26,9 +19,7 @@ public class AST {
 
     public AST(Symbol s) {
         leftMostSibling = this;
-        symTabEntry = new SymTabEntry(SymTabEntry.Kind.UNINITIALIZED);
         nodeSymbol = s;
-        symTab = new SymbolTable(s.lexeme);
     }
 
     public AST getParent() {
@@ -51,27 +42,6 @@ public class AST {
         return nodeSymbol;
     }
 
-    //to be overwritten by children classes (class, func, var)
-    public SymTabEntry getSymTabEntry() {
-        return symTabEntry;
-    }
-
-    public SymbolTable getSymTab(){
-        return symTab;
-    }
-
-    public void setSymTab(SymbolTable s) {
-        symTab = s;
-    }
-
-    public Map<String, SymbolTable> getSymTabMap() {
-        return getRoot().symTabMap;
-    }
-
-    public void addToSymTabMap (SymbolTable s) {
-        getRoot().getSymTabMap().put(s.getName(), s);
-    }
-
     public AST getRoot() {
         AST root = this;
         while(root.parent != null) {
@@ -80,6 +50,7 @@ public class AST {
         return root;
     }
 
+    //This method is still not clean. Need improvement.
     public static String getScopeName(AST node) {
         AST curr = node;
         if(curr instanceof ASTNode_ClassDecl && curr.parent instanceof ASTNode_ClassList) {
@@ -126,7 +97,7 @@ public class AST {
         return curr;
     }
 
-    //to be overwritten by child classes to allow dynamic dispatch
+    //to be overwritten by child classes to allow double dispatch
     public void accept(Visitor visitor) throws Exception {
         visitor.preVisit(this);
         for (AST child : this.getChildren() ) {

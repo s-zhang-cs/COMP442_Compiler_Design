@@ -7,7 +7,7 @@ public class ASTNode_ArithExpr extends AST {
     public ASTNode_ArithExpr(Symbol s) {
         super(s);
     }
-    @Override
+
     public void accept(Visitor visitor) throws Exception {
         visitor.preVisit(this);
         for (AST child : this.getChildren() ) {

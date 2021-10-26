@@ -8,7 +8,6 @@ public class ASTNode_IfStat extends ASTNode_Stat {
         super(s);
     }
 
-    @Override
     public void accept(Visitor visitor) throws Exception {
         visitor.preVisit(this);
         for (AST child : this.getChildren() ) {

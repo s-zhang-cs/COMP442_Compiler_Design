@@ -61,12 +61,6 @@ public class Symbol {
         return symbol.isEmpty();
     }
 
-//    public Symbol (Symbol s) {
-//        this.symbol = s.symbol;
-//        this.isTerminal = s.isTerminal;
-//        this.firstSet = s.firstSet;
-//    }
-
     public Set<Symbol> computeFirstSet(Symbol s){
         Map<Symbol, Set<Symbol>> first = Grammar.first;
         //if first is already defined for this symbol

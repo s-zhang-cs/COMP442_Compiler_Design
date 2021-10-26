@@ -1,24 +1,13 @@
 package grammar;
 
-import semantic.SymTabEntryParam;
 import semantic.Visitor;
 import symbol.Symbol;
 
 public class ASTNode_FParam extends AST{
-
-    SymTabEntryParam symTabEntry;
-
     public ASTNode_FParam(Symbol s) {
         super(s);
-        symTabEntry = new SymTabEntryParam();
     }
 
-    @Override
-    public SymTabEntryParam getSymTabEntry() {
-        return symTabEntry;
-    }
-
-    @Override
     public void accept(Visitor visitor) throws Exception {
         visitor.preVisit(this);
         for (AST child : this.getChildren() ) {
@@ -26,5 +15,4 @@ public class ASTNode_FParam extends AST{
         }
         visitor.visit(this);
     }
-
 }
