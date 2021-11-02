@@ -4,7 +4,6 @@ Part of the course work for COMP442 (Compiler Design) taught by professor Joey P
 Includes implementation of the compiler frontend (lexer, parser and AST generation). The following diagram shows the program 
 architecture. Only the conceptually important attributes and methods are shown.
 
-![alt text](resources/doc/Untitled Diagram.drawio.png)
 <img src="./resources/doc/Untitled Diagram.drawio.png">
 
 Since it is my first time implementing a compiler. The program results from a lot of trial and error and bears its
