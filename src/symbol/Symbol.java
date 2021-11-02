@@ -224,7 +224,9 @@ public class Symbol {
     public String toString() {
         String s = symbol;
         if(isTerminal) {
-            s += " -> " + lexeme;
+            if(lexeme != null) {
+                s += " -> " + lexeme;
+            }
         }
         else {
             s += " -> nonTerminal";

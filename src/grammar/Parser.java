@@ -21,9 +21,21 @@ public class Parser {
 
     public Parser(String filePath) throws Exception{
         lexer = new Lexer(filePath);
-        String fileOutput = filePath.replace(".src", ".outderivation");
+        String fileOutput = null;
+        if(filePath.endsWith(".src")) {
+            fileOutput = filePath.replace(".src", ".outderivation");
+        }
+        else if(filePath.endsWith(".tokenstream")) {
+            fileOutput = filePath.replace(".tokenstream", ".outderivation");
+        }
         derivationOutput = new FileWriter(fileOutput);
-        String errorOutput = filePath.replace(".src", ".outsyntaxerrors");
+        String errorOutput = null;
+        if(filePath.endsWith(".src")) {
+            errorOutput = filePath.replace(".src", ".outsyntaxerrors");
+        }
+        else if(filePath.endsWith(".tokenstream")) {
+            errorOutput = filePath.replace(".tokenstream", ".outsyntaxerrors");
+        }
         derivationErrorOutput = new FileWriter(errorOutput);
         derivationRules = new ArrayList<>();
         derivationSteps = new ArrayList<>();
@@ -43,6 +55,9 @@ public class Parser {
             derivationErrorOutput.close();
             System.out.println("Successfully parsed the source code.");
             return true;
+        }
+        else {
+            System.out.println("Source code does not follow the grammar specification.");
         }
         processDerivation();
         for(String derivation : derivationSteps) {
@@ -110,6 +125,7 @@ public class Parser {
             System.out.println("No AST is present. Did you parse?");
             return;
         }
+        System.out.println("Generated AST: ");
         System.out.println(semanticRecords.pop().toString());
     }
 
@@ -180,7 +196,7 @@ public class Parser {
         return beginString + replace + endString;
     }
 
-    //
+    //AST DONE
     public boolean APARAMS() throws Exception{
         if(!skipError(new Symbol("AParams", false))) return false;
         boolean match = true;
@@ -205,7 +221,7 @@ public class Parser {
         return match;
     }
 
-    //
+    //AST DONE
     public boolean APARAMSTAIL() throws Exception{
         if(!skipError(new Symbol("AParamsTail", false))) return false;
         boolean match = true;
@@ -257,6 +273,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean ARITHEXPR() throws Exception {
         if(!skipError(new Symbol("ArithExpr", false))) return false;
         boolean match = true;
@@ -308,6 +325,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean ARRAYSIZEREPT() throws Exception {
         if(!skipError(new Symbol("ArraySizeRept", false))) return false;
         boolean match = true;
@@ -331,13 +349,15 @@ public class Parser {
         return match;
     }
 
-    //
+    //AST DONE
     public boolean ASSIGNOP() throws Exception {
         if(!skipError(new Symbol("AssignOp", false))) return false;
         boolean match = true;
         if(lookahead.equals(new Symbol("assign", true))) {
             //<AssignOp> ::= 'assign'
-            if(match(new Symbol("assign", true)) ) {
+            if(
+                    match(new Symbol("assign", true)) && makeLeaf(new ASTNode_Assign(new Symbol("Assign", false)))
+            ) {
                 registerDerivation("<AssignOp> ::= 'assign'");
             }
             else {
@@ -350,6 +370,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean ASSIGNSTATTAIL() throws Exception {
         if(!skipError(new Symbol("AssignStatTail", false))) return false;
         boolean match = true;
@@ -357,7 +378,7 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(assignStatTail);
         if(assignStatTail.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<AssignStatTail> ::= <AssignOp> <Expr>
-            if(ASSIGNOP() && EXPR()) {
+            if(ASSIGNOP() && EXPR() && migrateAndMakeNode(1,1)) {
                 registerDerivation("<AssignStatTail> ::= <AssignOp> <Expr>");
             }
             else {
@@ -381,7 +402,7 @@ public class Parser {
                     && match(new Symbol("class", true)) && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
                     && markTree() && INHERIT() && makeTree(new ASTNode_InherList(new Symbol("InherList", false)))
                     && match(new Symbol("{", true))
-                    && markTree() && CLASSDECLBODY() && makeTree(new ASTNode_MembList(new Symbol("MembList", false)))
+                    && CLASSDECLBODY()
                     && match(new Symbol("}", true)) && match(new Symbol(";", true))
               && makeTree(new ASTNode_ClassDecl(new Symbol("ClassDecl", false)))
               && CLASSDECL()
@@ -433,6 +454,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean CLASSMETHOD() throws Exception {
         if(!skipError(new Symbol("ClassMethod", false))) return false;
         boolean match = true;
@@ -466,9 +488,11 @@ public class Parser {
         if(expr.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<Expr> ::= <ArithExpr> <ExprTail>
             if(
-                ARITHEXPR()
-                && EXPRTAIL())
-            {
+                    markTree()
+                && ARITHEXPR()
+                && EXPRTAIL()
+                && makeTree(new ASTNode_Expr(new Symbol("Expr", false)))
+            ){
                 registerDerivation("<Expr> ::= <ArithExpr> <ExprTail>");
             }
             else {
@@ -481,6 +505,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean EXPRTAIL() throws Exception {
         if(!skipError(new Symbol("ExprTail", false))) return false;
         boolean match = true;
@@ -509,6 +534,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FPARAMS() throws Exception {
         if(!skipError(new Symbol("FParams", false))) return false;
         boolean match = true;
@@ -516,13 +542,15 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(fParams);
         if(fParams.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<FParams> ::= <Type> 'id' <ArraySizeRept> <FParamsTail>
-            if(markTree()
-                &&markTree() && TYPE()
+            if(
+                    markTree()
+                && TYPE()
                 && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
                 && markTree() && ARRAYSIZEREPT() && makeTree(new ASTNode_DimList(new Symbol("DimList", false)))
-                && makeTree(new ASTNode_FParam(new Symbol("FParam", false))) && FPARAMSTAIL()
-              && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false))))
-            {
+                && makeTree(new ASTNode_FParam(new Symbol("FParam", false)))
+                            && FPARAMSTAIL()
+
+            ){
                 registerDerivation("<FParams> ::= <Type> 'id' <ArraySizeRept> <FParamsTail>");
             }
             else {
@@ -539,18 +567,20 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FPARAMSTAIL() throws Exception{
         if(!skipError(new Symbol("FParamsTail", false))) return false;
         boolean match = true;
         Symbol fParamsTail = new Symbol("FParamsTail", false);
         if(lookahead.equals(new Symbol(",", true))) {
             //<FParamsTail> ::= ',' <Type> 'id' <ArraySizeRept> <FParamsTail>
-            if( markTree() && match(new Symbol(",", true))
+            if( match(new Symbol(",", true))
+                    && markTree()
                     && TYPE()
                     && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
                     && markTree() && ARRAYSIZEREPT() && makeTree(new ASTNode_DimList(new Symbol("DimList", false)))
-             && makeTree(new ASTNode_FParam(new Symbol("FParam", false)))
-             && FPARAMSTAIL())
+                    && makeTree(new ASTNode_FParam(new Symbol("FParam", false)))
+                    && FPARAMSTAIL())
             {
                 registerDerivation("<FParamsTail> ::= ',' <Type> 'id' <ArraySizeRept> <FParamsTail>");
             }
@@ -568,13 +598,13 @@ public class Parser {
         return match;
     }
 
-    //
+    //AST DONE
     public boolean FACTOR() throws Exception{
         if(!skipError(new Symbol("Factor", false))) return false;
         boolean match = true;
         Symbol factor = new Symbol("Factor", false);
         List<List<Symbol>> first = Grammar.productions.get(factor);
-        //
+        //ast done
         if(factor.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<Factor> ::= <FuncOrVar>
             if(FUNCORVAR()) {
@@ -653,12 +683,16 @@ public class Parser {
                 match = false;
             }
         }
-        //
+        //ast done
         else if(lookahead.equals(new Symbol("qm", true))) {
             //<Factor> ::= 'qm' '[' <Expr> ':' <Expr> ':' <Expr> ']'
-            if(match(new Symbol("qm", true))&& match(new Symbol("[", true)) && EXPR()
+            if(match(new Symbol("qm", true))&& match(new Symbol("[", true))
+                    && markTree()
+                    && EXPR()
                     && match(new Symbol(":", true)) && EXPR() && match(new Symbol(":", true))
-                    && EXPR() && match(new Symbol("]", true)))
+                    && EXPR() && match(new Symbol("]", true))
+                    && makeTree(new ASTNode_TernaryExpr(new Symbol("TernaryExpr", false)))
+            )
             {
                 registerDerivation("<Factor> ::= 'qm' '[' <Expr> ':' <Expr> ':' <Expr> ']'");
             }
@@ -672,6 +706,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCBODY() throws Exception {
         if(!skipError(new Symbol("FuncBody", false))) return false;
         boolean match = true;
@@ -681,7 +716,7 @@ public class Parser {
                     && markTree()
                     && METHODBODYVAR()
                     && STATEMENTLIST()
-                    && makeTree(new ASTNode_StatBlock(new Symbol("StatBlock", false)))
+                    && makeTree(new ASTNode_StatList(new Symbol("StatList", false)))
                && match(new Symbol("}", true)))
             {
                 registerDerivation("<FuncBody> ::= '{' <MethodBodyVar> <StatementList> '}'");
@@ -696,6 +731,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCDECL() throws Exception{
         if(!skipError(new Symbol("FuncDecl", false))) return false;
         boolean match = true;
@@ -705,9 +741,10 @@ public class Parser {
             if(match(new Symbol("func", true))
                     && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
                     && match(new Symbol("(", true))
-                    && FPARAMS()
+                    && markTree() && FPARAMS() && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false)))
                     && match(new Symbol(")", true)) && match(new Symbol(":", true))
-                    && FUNCDECLTAIL() && match(new Symbol(";", true)))
+                    && markTree() && FUNCDECLTAIL() && makeTree(new ASTNode_ReturnType(new Symbol("ReturnType", false)))
+                    && match(new Symbol(";", true)))
             {
                 registerDerivation("<FuncDecl> ::= 'func' 'id' '(' <FParams> ')' ':' <FuncDeclTail> ';' ");
             }
@@ -721,6 +758,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCDECLTAIL() throws Exception {
         if(!skipError(new Symbol("FuncDeclTail", false))) return false;
         boolean match = true;
@@ -750,6 +788,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCDEF() throws Exception {
         if(!skipError(new Symbol("FuncDef", false))) return false;
         boolean match = true;
@@ -757,9 +796,10 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(funcDef);
         if(funcDef.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<FuncDef> ::= <Function> <FuncDef>
-            if(markTree()
-                    && FUNCTION() && makeTree(new ASTNode_FuncDef(new Symbol("FuncDef", false)))
-                    && FUNCDEF()) {
+            if(
+                    markTree() && FUNCTION() && makeTree(new ASTNode_FuncDef(new Symbol("FuncDef", false)))
+                    && FUNCDEF()
+            ) {
                registerDerivation("<FuncDef> ::= <Function> <FuncDef>");
             }
             else {
@@ -776,6 +816,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCHEAD() throws Exception {
         if(!skipError(new Symbol("FuncHead", false))) return false;
         boolean match = true;
@@ -785,9 +826,12 @@ public class Parser {
             if(match(new Symbol("func", true))
                     && match(new Symbol("id", true)) && makeLeaf(new ASTNode_ScopeSpec(new Symbol("scope", prevLookahead.lexeme, true)))
                     && CLASSMETHOD()
-                    && match(new Symbol("(", true)) && FPARAMS() && match(new Symbol(")", true))
-                    && match(new Symbol(":", true)) && FUNCDECLTAIL())
-            {
+                    && match(new Symbol("(", true))
+                    && markTree() && FPARAMS() && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false)))
+                    && match(new Symbol(")", true))
+                    && match(new Symbol(":", true))
+                    && markTree() && FUNCDECLTAIL() && makeTree(new ASTNode_ReturnType(new Symbol("ReturnType", false)))
+            ){
                 registerDerivation("<FuncHead> ::= 'func' 'id' <ClassMethod> '(' <FParams> ')' ':' <FuncDeclTail> ");
             }
             else {
@@ -800,6 +844,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCORASSIGNSTAT() throws Exception {
         if(!skipError(new Symbol("FuncOrAssignStat", false))) return false;
         boolean match = true;
@@ -807,9 +852,7 @@ public class Parser {
         {
             //<FuncOrAssignStat> ::= 'id' <FuncOrAssignStatIdnest>
             if(
-                    //makeTree() resides in FUNCORASSIGNSTATIDNESTVARTAIL()
-                    markTree()
-                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
                     && FUNCORASSIGNSTATIDNEST())
             {
                 registerDerivation("<FuncOrAssignStat> ::= 'id' <FuncOrAssignStatIdnest> ");
@@ -824,6 +867,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCORASSIGNSTATIDNEST() throws Exception {
         if(!skipError(new Symbol("FuncOrAssignStatIdnest", false))) return false;
         boolean match = true;
@@ -832,8 +876,10 @@ public class Parser {
         if(funcOrAssignStatIdNest.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<FuncOrAssignStatIdnest> ::= <IndiceRep> <FuncOrAssignStatIdnestVarTail>
             if(
-                    INDICEREP()
-                    && FUNCORASSIGNSTATIDNESTVARTAIL()
+                    markTree() && INDICEREP() && makeTree(new ASTNode_IndiceList(new Symbol("IndiceList", false))) && migrateAndMakeNode(0,1)
+                            //. chaining
+                            && ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
+                            && FUNCORASSIGNSTATIDNESTVARTAIL()
             )
 
             {
@@ -848,13 +894,13 @@ public class Parser {
             //<FuncOrAssignStatIdnest> ::= '(' <AParams> ')' <FuncOrAssignStatIdnestFuncTail>
             if(
                     match(new Symbol("(", true))
-                    //markTree resides in FUNCORASSIGNSTAT()
-                    && makeTree(new ASTNode_Func(new Symbol("Func", false)))
-                    && markTree()
-                    && APARAMS()
-                    && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false)))
+                    && markTree()&& APARAMS() && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false))) && migrateAndMakeNode(0,1)
                     && match(new Symbol(")", true))
-                    && FUNCORASSIGNSTATIDNESTFUNCTAIL()
+                            //. chaining
+                            && ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
+                            && FUNCORASSIGNSTATIDNESTFUNCTAIL()
+                    && makeNode(new ASTNode_Func(new Symbol("Func", false)), 1)
+
             )
             {
                 registerDerivation("<FuncOrAssignStatIdnest> ::= '(' <AParams> ')' <FuncOrAssignStatIdnestFuncTail> ");
@@ -873,17 +919,18 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCORASSIGNSTATIDNESTFUNCTAIL() throws Exception {
         if(!skipError(new Symbol("FuncOrAssignStatIdnestFuncTail", false))) return false;
         boolean match = true;
         Symbol funcOrAssignStatIdnestFuncTail = new Symbol("FuncOrAssignStatIdnestFuncTail", false);
         if(lookahead.equals(new Symbol(".", true))) {
             //<FuncOrAssignStatIdnestFuncTail> ::= '.' 'id' <FuncStatTail>
-            if( //markTree resides in FUNCORASSIGNSTAT()
-                makeTree(new ASTNode_FuncDef(new Symbol("FuncDef", false)))
-                    && match(new Symbol(".", true))
+            if(
+                    match(new Symbol(".", true)) && makeLeaf(new ASTNode_Dot(new Symbol("Dot", false)))
                     && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
-                    && FUNCSTATTAIL()) {
+                    && FUNCSTATTAIL()
+            ) {
                 registerDerivation("<FuncOrAssignStatIdnestFuncTail> ::= '.' 'id' <FuncStatTail> ");
             }
             else {
@@ -900,6 +947,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCORASSIGNSTATIDNESTVARTAIL() throws Exception {
         if(!skipError(new Symbol("FuncOrAssignStatIdnestVarTail", false))) return false;
         boolean match = true;
@@ -907,7 +955,12 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(funcOrAssignStatIdnestVarTail);
         if(lookahead.equals(new Symbol(".", true))) {
             //<FuncOrAssignStatIdnestVarTail> ::= '.' 'id' <FuncOrAssignStatIdnest>
-            if(match(new Symbol(".", true)) && match(new Symbol("id", true)) && FUNCORASSIGNSTATIDNEST())
+            if(
+                    match(new Symbol(".", true))
+                            && makeLeaf(new ASTNode_Dot(new Symbol("Dot", false)))
+                            && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                            && FUNCORASSIGNSTATIDNEST()
+            )
             {
                 registerDerivation("<FuncOrAssignStatIdnestVarTail> ::= '.' 'id' <FuncOrAssignStatIdnest>");
             }
@@ -918,9 +971,9 @@ public class Parser {
         else if(funcOrAssignStatIdnestVarTail.computeFirstSetForSymbolString(first.get(1)).contains(lookahead)) {
             //<FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail>
             if(
-                    //markTree resides in FUNCORASSIGNSTAT()
-                    makeTree(new ASTNode_Var(new Symbol("Var", false)))
-                    && markTree() && ASSIGNSTATTAIL() && makeTree(new ASTNode_Expr(new Symbol("Expr", false))))
+
+                    ASSIGNSTATTAIL()
+            )
             {
                 registerDerivation("<FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail> ");
             }
@@ -955,7 +1008,7 @@ public class Parser {
         return match;
     }
 
-    //
+    //AST DONE
     public boolean FUNCORVARIDNEST() throws Exception {
         if(!skipError(new Symbol("FuncOrVarIdnest", false))) return false;
         boolean match = true;
@@ -965,7 +1018,9 @@ public class Parser {
         if(funcOrVarIdnest.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<FuncOrVarIdnest> ::= <IndiceRep> <FuncOrVarIdnestTail>
             if(
-                    markTree() && INDICEREP() && makeTree(new ASTNode_DimList(new Symbol("DimList", false))) && migrateAndMakeNode(0, 1)
+                    markTree() && INDICEREP() && makeTree(new ASTNode_IndiceList(new Symbol("IndiceList", false))) && migrateAndMakeNode(0, 1)
+                    //. chaining
+                    && ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
                     && FUNCORVARIDNESTTAIL())
             {
                 registerDerivation("<FuncOrVarIdnest> ::= <IndiceRep> <FuncOrVarIdnestTail>");
@@ -979,8 +1034,12 @@ public class Parser {
             if(
                     match(new Symbol("(", true))
                     && markTree() && APARAMS() && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false))) && migrateAndMakeNode(0, 1)
+                    //. chaining
+                    && ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
                     && match(new Symbol(")", true))
-                    && FUNCORVARIDNESTTAIL() )
+                    && FUNCORVARIDNESTTAIL()
+                    //&& makeNode(new ASTNode_Func(new Symbol("Func", false)), 1)
+            )
             {
                 registerDerivation("<FuncOrVarIdnest> ::= '(' <AParams> ')' <FuncOrVarIdnestTail>");
             }
@@ -989,7 +1048,11 @@ public class Parser {
             }
         }
         //<FuncOrVarIdnest> ::= EPSILON
-        else if(funcOrVarIdnest.computeFollowSet(funcOrVarIdnest, new HashSet<Symbol>()).contains(lookahead)) {
+        else if(
+                funcOrVarIdnest.computeFollowSet(funcOrVarIdnest, new HashSet<Symbol>()).contains(lookahead)
+                 //. chaining
+                 && ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
+        ) {
             registerDerivation("<FuncOrVarIdnest> ::= epsilon");
         }
         else {
@@ -998,7 +1061,7 @@ public class Parser {
         return match;
     }
 
-    //
+    //AST DONE
     public boolean FUNCORVARIDNESTTAIL() throws Exception {
         if(!skipError(new Symbol("FuncOrVarIdnestTail", false))) return false;
         boolean match = true;
@@ -1009,8 +1072,6 @@ public class Parser {
                match(new Symbol(".", true)) && makeLeaf(new ASTNode_Dot(new Symbol("Dot", false)))
                && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
                && FUNCORVARIDNEST()
-               && migrateAndMakeNode(1,1)
-
             )
             {
                 registerDerivation("<FuncOrVarIdnestTail> ::= '.' 'id' <FuncOrVarIdnest>");
@@ -1029,6 +1090,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCSTATTAIL() throws Exception {
         if(!skipError(new Symbol("FuncStatTail", false))) return false;
         boolean match = true;
@@ -1036,8 +1098,16 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(funcStatTail);
         if(funcStatTail.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<FuncStatTail> ::= <IndiceRep> <FuncStatTailIdnest>
-            if(INDICEREP() && FUNCSTATTAILIDNEST())
-            {
+            if(
+
+                    markTree() && INDICEREP() && makeTree(new ASTNode_IndiceList(new Symbol("IndiceList", false))) && migrateAndMakeNode(0, 1)
+                            //. chaining
+                            && ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
+                            && match(new Symbol(".", true)) && makeLeaf(new ASTNode_Dot(new Symbol("Dot", false)))
+                            && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                            && FUNCSTATTAIL()
+
+            ){
                 registerDerivation("<FuncStatTail> ::= <IndiceRep> <FuncStatTailIdnest>");
             }
             else {
@@ -1047,7 +1117,9 @@ public class Parser {
         else if(lookahead.equals(new Symbol("(", true)))
         {
             //<FuncStatTail> ::= '(' <AParams> ')' <FuncStatTailIdnest>
-            if(match(new Symbol("(", true)) && APARAMS() && match(new Symbol(")", true)) && FUNCSTATTAILIDNEST())
+            if(match(new Symbol("(", true))
+                    && markTree() && APARAMS() && makeTree(new ASTNode_FParamList(new Symbol("FParamList", false))) && migrateAndMakeNode(0,1)
+                    && match(new Symbol(")", true)) && FUNCSTATTAILIDNEST())
             {
                 registerDerivation("<FuncStatTail> ::= '(' <AParams> ')' <FuncStatTailIdnest>");
             }
@@ -1065,13 +1137,21 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCSTATTAILIDNEST() throws Exception {
         if(!skipError(new Symbol("FuncStatTailIdnest", false))) return false;
         boolean match = true;
         Symbol funcStatTailIdnest = new Symbol("FuncStatTailIdnest", false);
         if(lookahead.equals(new Symbol(".", true))) {
             //<FuncStatTailIdnest> ::= '.' 'id' <FuncStatTail>
-            if(match(new Symbol(".", true)) && match(new Symbol("id", true)) && FUNCSTATTAIL())
+            if(
+                    //. chaining
+                    ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
+                    && match(new Symbol(".", true)) && makeLeaf(new ASTNode_Dot(new Symbol("Dot", false)))
+                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    && FUNCSTATTAIL()
+                    && migrateAndMakeNode(1,1)
+            )
             {
                 registerDerivation("<FuncStatTailIdnest> ::= '.' 'id' <FuncStatTail>");
             }
@@ -1089,6 +1169,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean FUNCTION() throws Exception {
         if(!skipError(new Symbol("Function", false))) return false;
         boolean match = true;
@@ -1141,6 +1222,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean INHERIT() throws Exception{
         if(!skipError(new Symbol("Inherit", false))) return false;
         boolean match = true;
@@ -1170,6 +1252,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean INTNUM() throws Exception {
         if(!skipError(new Symbol("IntNum", false))) return false;
         boolean match = true;
@@ -1193,6 +1276,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean MEMBERDECL() throws Exception {
         if(!skipError(new Symbol("MemberDecl", false))) return false;
         boolean match = true;
@@ -1223,6 +1307,7 @@ public class Parser {
         return match;
     }
 
+    //AST DONE
     public boolean METHODBODYVAR() throws Exception {
         if(!skipError(new Symbol("MethodBodyVar", false))) return false;
         boolean match = true;
@@ -1296,7 +1381,7 @@ public class Parser {
         return match;
     }
 
-    //
+    //AST DONE
     public boolean NESTEDID() throws Exception {
         if(!skipError(new Symbol("NestedId", false))) return false;
         boolean match = true;
@@ -1452,7 +1537,7 @@ public class Parser {
         return match;
     }
 
-    //AST DONE
+    //AST DONE ??
     public boolean STATBLOCK() throws Exception {
         if(!skipError(new Symbol("StatBlock", false))) return false;
         boolean match = true;
@@ -1461,7 +1546,9 @@ public class Parser {
         if(lookahead.equals(new Symbol("{", true)))
         {
             //<StatBlock> ::= '{' <StatementList> '}'
-            if(match(new Symbol("{", true)) && STATEMENTLIST() && match(new Symbol("}", true))) {
+            if(match(new Symbol("{", true))
+                    &&markTree() && STATEMENTLIST() && makeTree(new ASTNode_StatBlock(new Symbol("StatBlock", false)))
+                    && match(new Symbol("}", true))) {
                 registerDerivation("<StatBlock> ::= '{' <StatementList> '}'");
             }
             else {
@@ -1493,9 +1580,10 @@ public class Parser {
         boolean match = true;
         Symbol statement = new Symbol("Statement", false);
         List<List<Symbol>> first = Grammar.productions.get(statement);
+        //AST DONE
         if(statement.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<Statement> ::= <FuncOrAssignStat> ';'
-            if(markTree() && FUNCORASSIGNSTAT() && makeTree(new ASTNode_AssignStat(new Symbol("AssignStat", false)))
+            if(FUNCORASSIGNSTAT()
                   && match(new Symbol(";", true))) {
                 registerDerivation("<Statement> ::= <FuncOrAssignStat> ';'");
             }
@@ -1503,17 +1591,20 @@ public class Parser {
                 match = false;
             }
         }
+        //AST DONE
         else if(lookahead.equals(new Symbol("if", true))) {
             //<Statement> ::= 'if' '(' <Expr> ')' 'then' <StatBlock> 'else' <StatBlock> ';'
-            if(markTree() && match(new Symbol("if", true))
+            if(     match(new Symbol("if", true))
                     && match(new Symbol("(", true))
                     && EXPR()
-                    && match(new Symbol(")", true)) && match(new Symbol("then", true))
-                    && markTree() && STATBLOCK() && makeTree(new ASTNode_StatBlock(new Symbol("StatBlock", false)))
+                    && match(new Symbol(")", true))
+                    && match(new Symbol("then", true))
+                    && markTree() && STATBLOCK() && makeTree(new ASTNode_ThenBlock(new Symbol("ThenBLock", false)))
                     && match(new Symbol("else", true))
-                    && markTree() && STATBLOCK() && makeTree(new ASTNode_StatBlock(new Symbol("StatBlock", false)))
+                    && markTree() && STATBLOCK() && makeTree(new ASTNode_ElseBlock(new Symbol("ElseBlock", false)))
                     && match(new Symbol(";", true))
-              && makeTree(new ASTNode_IfStat(new Symbol("IfStat", false))))
+                    && makeNode(new ASTNode_IfStat(new Symbol("IfStat", false)), 3)
+            )
             {
                 registerDerivation("<Statement> ::= 'if' '(' <Expr> ')' 'then' <StatBlock> 'else' <StatBlock> ';'");
             }
@@ -1521,10 +1612,13 @@ public class Parser {
                 match = false;
             }
         }
+        //AST DONE
         else if(lookahead.equals(new Symbol("while", true))) {
             //<Statement> ::= 'while' '(' <Expr> ')' <StatBlock> ';'
             if(match(new Symbol("while", true)) && match(new Symbol("(", true)) && EXPR()
-                    && match(new Symbol(")", true)) && STATBLOCK() && match(new Symbol(";", true)))
+               && match(new Symbol(")", true)) && STATBLOCK() && match(new Symbol(";", true))
+               && makeNode(new ASTNode_WhileStat(new Symbol("WhileStat", false)), 2)
+            )
             {
                 registerDerivation("<Statement> ::= 'while' '(' <Expr> ')' <StatBlock> ';'");
             }
@@ -1532,10 +1626,13 @@ public class Parser {
                 match = false;
             }
         }
+        //
         else if(lookahead.equals(new Symbol("read", true))) {
             //<Statement> ::= 'read' '(' <Variable> ')' ';'
             if(match(new Symbol("read", true)) && match(new Symbol("(", true)) && VARIABLE()
-                    && match(new Symbol(")", true)) && match(new Symbol(";", true)))
+               && match(new Symbol(")", true)) && match(new Symbol(";", true))
+                    && makeNode(new ASTNode_ReadStat(new Symbol("ReadStat", true)), 1)
+            )
             {
                 registerDerivation("<Statement> ::= 'read' '(' <Variable> ')' ';'");
             }
@@ -1543,10 +1640,13 @@ public class Parser {
                 match = false;
             }
         }
+        //AST DONE
         else if(lookahead.equals(new Symbol("write", true))) {
             //<Statement> ::= 'write' '(' <Expr> ')' ';'
             if(match(new Symbol("write", true)) && match(new Symbol("(", true)) && EXPR()
-                    && match(new Symbol(")", true)) && match(new Symbol(";", true)))
+               && match(new Symbol(")", true)) && match(new Symbol(";", true))
+               && makeNode(new ASTNode_WriteStat(new Symbol("WriteStat", false)), 1)
+            )
             {
                 registerDerivation("<Statement> ::= 'write' '(' <Expr> ')' ';'");
             }
@@ -1554,11 +1654,14 @@ public class Parser {
                 match = false;
             }
         }
+        //AST DONE
         else if(lookahead.equals(new Symbol("return", true))) {
             //<Statement> ::= 'return' '(' <Expr> ')' ';'
             if(match(new Symbol("return", true)) && match(new Symbol("(", true))
                     && EXPR() && makeNode(new ASTNode_ReturnStat(new Symbol("ReturnStat", false)), 1)
-                    && match(new Symbol(")", true)) && match(new Symbol(";", true)))
+                    && match(new Symbol(")", true)) && match(new Symbol(";", true))
+                    && makeNode(new ASTNode_ReturnStat(new Symbol("ReturnStat", false)), 1)
+            )
             {
                 registerDerivation("<Statement> ::= 'return' '(' <Expr> ')' ';'");
             }
@@ -1566,18 +1669,24 @@ public class Parser {
                 match = false;
             }
         }
+        //AST DONE
         else if(lookahead.equals(new Symbol("break", true))) {
             //<Statement> ::= 'break' ';'
-            if(match(new Symbol("break", true)) && match(new Symbol(";", true))) {
+            if(match(new Symbol("break", true)) && match(new Symbol(";", true))
+            && makeLeaf(new ASTNode_BreakStat(new Symbol("BreakStat", true)))
+            ) {
                 registerDerivation("<Statement> ::= 'break' ';'");
             }
             else {
                 match = false;
             }
         }
-        else if(lookahead.equals("continue")) {
+        //AST DONE
+        else if(lookahead.equals(new Symbol("continue", true))) {
             //<Statement> ::= 'continue' ';'
-            if(match(new Symbol("continue", true)) && match(new Symbol(";", true))) {
+            if(match(new Symbol("continue", true)) && match(new Symbol(";", true))
+            && makeLeaf(new ASTNode_ContinueStat(new Symbol("ContinueStat", true)))
+            ) {
                 registerDerivation("<Statement> ::= 'continue' ';'");
             }
             else {
@@ -1598,7 +1707,7 @@ public class Parser {
         List<List<Symbol>> first = Grammar.productions.get(statementList);
         if(statementList.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<StatementList> ::= <Statement> <StatementList>
-            if(markTree() && STATEMENT() && makeTree(new ASTNode_Stat(new Symbol("Stat", false))) && STATEMENTLIST()) {
+            if(STATEMENT() && STATEMENTLIST()) {
                 registerDerivation("<StatementList> ::= <Statement> <StatementList>");
             }
             else {
@@ -1766,7 +1875,7 @@ public class Parser {
         return match;
     }
 
-    //
+    //AST DONE
     public boolean VARIABLE() throws Exception {
         if(!skipError(new Symbol("Variable", false))) return false;
         boolean match = true;
@@ -1797,8 +1906,10 @@ public class Parser {
         if(variableIdnest.computeFirstSetForSymbolString(first.get(0)).contains(lookahead)) {
             //<VariableIdnest> ::= <IndiceRep> <VariableIdnestTail>
             if(
-                    INDICEREP()
-                    && VARIABLEIDNESTTAIL())
+                    markTree() && INDICEREP() && makeTree(new ASTNode_IndiceList(new Symbol("IndiceList", false))) && migrateAndMakeNode(0,1)
+                            //. chaining
+                            && ((semanticRecords.elementAt(semanticRecords.size() - 2) instanceof ASTNode_Dot && migrateAndMakeNode(1,1)) || true)
+                            && VARIABLEIDNESTTAIL())
             {
                 registerDerivation("<VariableIdnest> ::= <IndiceRep> <VariableIdnestTail>");
             }
@@ -1824,7 +1935,9 @@ public class Parser {
         if(lookahead.equals(new Symbol(".", true)))
         {
             //<VariableIdnestTail> ::= '.' 'id' <VariableIdnest>
-            if(match(new Symbol(".", true)) && match(new Symbol("id", true)) && VARIABLEIDNEST()) {
+            if(match(new Symbol(".", true)) && makeLeaf(new ASTNode_Dot(new Symbol("Dot", false)))
+                    && match(new Symbol("id", true)) && makeLeaf(new ASTNode_Id(prevLookahead))
+                    && VARIABLEIDNEST()) {
                 registerDerivation("<VariableIdnestTail> ::= '.' 'id' <VariableIdnest>");
             }
             else {
@@ -1897,8 +2010,12 @@ public class Parser {
         if(!applySemanticRecords) {
             return true;
         }
+        Stack<AST> st = new Stack<>();
         for(int i = 0; i < numNode; i++) {
-            ast.adoptChildren(semanticRecords.pop());
+            st.push(semanticRecords.pop());
+        }
+        for(int i = 0; i < numNode; i++) {
+            ast.adoptChildren(st.pop());
         }
         semanticRecords.push(ast);
         return true;
@@ -1908,16 +2025,20 @@ public class Parser {
         if(!applySemanticRecords) {
             return true;
         }
-        List<AST> nodesRight = new ArrayList<>();
+        Stack<AST> nodesRight = new Stack<>();
         for(int i = 0; i < numNodeRight; i++) {
-            nodesRight.add(semanticRecords.pop());
+            nodesRight.push(semanticRecords.pop());
         }
         AST parentNode = semanticRecords.pop();
-        for(int i = 0; i <numNodeRight; i++) {
-            parentNode.adoptChildren(nodesRight.get(i));
+        Stack<AST> nodesLeft = new Stack<>();
+        for(int i = 0; i < numNodeLeft; i++) {
+            nodesLeft.push(semanticRecords.pop());
         }
         for(int i = 0; i < numNodeLeft; i++) {
-            parentNode.adoptChildren(semanticRecords.pop());
+            parentNode.adoptChildren(nodesLeft.pop());
+        }
+        for(int i = 0; i < numNodeRight; i++) {
+            parentNode.adoptChildren(nodesRight.pop());
         }
         semanticRecords.push(parentNode);
         return true;

@@ -1,4 +1,4 @@
-//print the array
+//Sort the array
 func bubbleSort(integer arr[], integer size) : void
 {
   var
@@ -27,7 +27,7 @@ func bubbleSort(integer arr[], integer size) : void
   };
 }
 
-//print the array
+//Print the array
 func printArray(integer arr[], integer size) : void
 {
   var
@@ -46,12 +46,18 @@ func printArray(integer arr[], integer size) : void
 // main funtion to test above
 main
 {
-        arr[0] = 64;                                     // 3.1
-        arr[1] = 34;                                     // 3.1
-        arr[2] = 25;                                     // 3.1
-        arr[3] = 12;                                     // 3.1
-        arr[4] = 22;                                     // 3.1
-        arr[5] = 11;                                     // 3.1
-        arr[6] = 90;
+  var
+  {
+    integer arr[7];
+  }
+  arr[0] = 64;
+  arr[1] = 34;
+  arr[2] = 25;
+  arr[3] = 12;
+  arr[4] = 22;
+  arr[5] = 11;
+  arr[6] = 90;
+  printarray(arr, 7);
+  bubbleSort(arr, 7);
+  printarray(arr, 7);
 }
-
