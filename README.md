@@ -1,13 +1,12 @@
 # COMPILER FRONTEND
 
 Part of the course work for COMP442 (Compiler Design) taught by professor Joey Paquet at Concordia University for Winter2021.
-Includes implementation of the compiler frontend (lexer, parser and AST generation). The following diagram shows the program 
-architecture. Only the conceptually important attributes and methods are shown.
+Includes implementation of the compiler frontend (lexer, parser and AST generation) from scratch for a fictional programming language called 'Moon'. The following diagram shows the program architecture. Only the conceptually important attributes and methods are shown.
 
 <img src="./resources/doc/Untitled Diagram.drawio.png">
 
 Since it is my first time implementing a compiler. The program results from a lot of trial and error and bears its
-cost. I believe that after continuous improvement the frontend is now rather clean, and I thus only uploaded the frontend. 
+cost. I only uploaded the frontend part because I believe it is now rather 'clean' after continuous improvement. 
 I will upload the "cleaned" backend part once no other job takes priority.
 
 The lexical specification is as follow:
