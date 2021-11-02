@@ -320,9 +320,8 @@ Prog -> nonTerminal
 │   │   │   └── float -> float
 │   │   └── StatList -> nonTerminal
 │   │       └── ReturnStat -> nonTerminal
-│   │           └── ReturnStat -> nonTerminal
-│   │               └── Expr -> nonTerminal
-│   │                   └── intnum -> 0
+│   │           └── Expr -> nonTerminal
+│   │               └── intnum -> 0
 │   ├── FuncDef -> nonTerminal
 │   │   ├── scope -> LINEAR
 │   │   ├── id -> evaluate
@@ -353,9 +352,8 @@ Prog -> nonTerminal
 │   │       │           │   └── id -> x
 │   │       │           └── id -> b
 │   │       └── ReturnStat -> nonTerminal
-│   │           └── ReturnStat -> nonTerminal
-│   │               └── Expr -> nonTerminal
-│   │                   └── id -> result
+│   │           └── Expr -> nonTerminal
+│   │               └── id -> result
 │   ├── FuncDef -> nonTerminal
 │   │   ├── scope -> QUADRATIC
 │   │   ├── id -> evaluate
@@ -395,9 +393,8 @@ Prog -> nonTerminal
 │   │       │           │   └── id -> x
 │   │       │           └── id -> c
 │   │       └── ReturnStat -> nonTerminal
-│   │           └── ReturnStat -> nonTerminal
-│   │               └── Expr -> nonTerminal
-│   │                   └── id -> result
+│   │           └── Expr -> nonTerminal
+│   │               └── id -> result
 │   ├── FuncDef -> nonTerminal
 │   │   ├── scope -> LINEAR
 │   │   ├── id -> build
@@ -434,9 +431,8 @@ Prog -> nonTerminal
 │   │       │   └── Expr -> nonTerminal
 │   │       │       └── id -> B
 │   │       └── ReturnStat -> nonTerminal
-│   │           └── ReturnStat -> nonTerminal
-│   │               └── Expr -> nonTerminal
-│   │                   └── id -> new_function
+│   │           └── Expr -> nonTerminal
+│   │               └── id -> new_function
 │   └── FuncDef -> nonTerminal
 │       ├── scope -> QUADRATIC
 │       ├── id -> build
@@ -485,9 +481,8 @@ Prog -> nonTerminal
 │           │   └── Expr -> nonTerminal
 │           │       └── id -> C
 │           └── ReturnStat -> nonTerminal
-│               └── ReturnStat -> nonTerminal
-│                   └── Expr -> nonTerminal
-│                       └── id -> new_function
+│               └── Expr -> nonTerminal
+│                   └── id -> new_function
 └── FuncMain -> nonTerminal
     └── StatList -> nonTerminal
         ├── VarDecl -> nonTerminal

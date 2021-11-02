@@ -1660,7 +1660,6 @@ public class Parser {
             if(match(new Symbol("return", true)) && match(new Symbol("(", true))
                     && EXPR() && makeNode(new ASTNode_ReturnStat(new Symbol("ReturnStat", false)), 1)
                     && match(new Symbol(")", true)) && match(new Symbol(";", true))
-                    && makeNode(new ASTNode_ReturnStat(new Symbol("ReturnStat", false)), 1)
             )
             {
                 registerDerivation("<Statement> ::= 'return' '(' <Expr> ')' ';'");
