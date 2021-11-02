@@ -1,13 +1,12 @@
 # COMPILER FRONTEND
 
 Part of the course work for COMP442 (Compiler Design) taught by professor Joey Paquet at Concordia University for Winter2021.
-Includes implementation of the compiler frontend (lexer, parser and AST generation). The following diagram shows the program 
-architecture. Only the conceptually important attributes and methods are shown.
+Includes implementation of the compiler frontend (lexer, parser and AST generation) from scratch for a fictional programming language called 'Moon'. The following diagram shows the program architecture. Only the conceptually important attributes and methods are shown.
 
 <img src="./resources/doc/Untitled Diagram.drawio.png">
 
 Since it is my first time implementing a compiler. The program results from a lot of trial and error and bears its
-cost. I believe that after continuous improvement the frontend is now rather clean, and I thus only uploaded the frontend. 
+cost. I only uploaded the frontend part because I believe it is now rather 'clean' after continuous improvement. 
 I will upload the "cleaned" backend part once no other job takes priority.
 
 The lexical specification is as follow:
@@ -98,329 +97,471 @@ R – Rules
 
 DEMO:
 for the following 'moon' source code:
-```//Sort the array
-   func bubbleSort(integer arr[], integer size) : void
-   {
-     var
-     {
-       integer n;
-       integer i;
-       integer j;
-       integer temp;
-     }
-     n = size;
-     i = 0;
-     j = 0;
-     temp = 0;
-     while (i < n-1) {
-       while (j < n-i-1) {
-         if (arr[j] > arr[j+1])
-           then {
-             // swap temp and arr[i]
-             temp = arr[j];
-             arr[j] = arr[j+1];
-             arr[j+1] = temp;
-           } else ;
-           j = j+1;
-         };
-       i = i+1;
-     };
-   }
-   
-   //Print the array
-   func printArray(integer arr[], integer size) : void
-   {
-     var
-     {
-       integer n;
-       integer i;
-     }
-     n = size;
-     i = 0;
-     while (i<n) {
-       write(arr[i]);
-         i = i+1;
-     };
-   }
-   
-   // main funtion to test above
-   main
-   {
-     var
-     {
-       integer arr[7];
-     }
-     arr[0] = 64;
-     arr[1] = 34;
-     arr[2] = 25;
-     arr[3] = 12;
-     arr[4] = 22;
-     arr[5] = 11;
-     arr[6] = 90;
-     printarray(arr, 7);
-     bubbleSort(arr, 7);
-     printarray(arr, 7);
-   }
+```$xslt
+// ====== Class declarations ====== //
+class POLYNOMIAL {
+	public func evaluate(float x) : float;
+};
+
+class LINEAR inherits POLYNOMIAL {
+	private float a;
+	private float b;
+
+	public func build(float A, float B) : LINEAR;
+	public func evaluate(float x) : float;
+};
+
+class QUADRATIC inherits POLYNOMIAL {
+	private float a;
+	private float b;
+	private float c;
+
+	public func build(float A, float B, float C) : QUADRATIC;
+	public func evaluate(float x) : float;
+};
+
+// ====== Function Definitions ====== //
+func POLYNOMIAL::evaluate(float x) : float
+{
+  return (0);
+}
+
+func LINEAR::evaluate(float x) : float
+{
+  var
+  {
+    float result;
+  }
+  result = 0.0;
+  result = a * x + b;
+  return (result);
+}
+
+func QUADRATIC::evaluate(float x) : float
+{
+  var
+  {
+    float result;
+  }
+  //Using Horner's method
+  result = a;
+  result = result * x + b;
+  result = result * x + c;
+  return (result);
+}
+
+func LINEAR::build(float A, float B) : LINEAR
+{
+  var
+  {
+    LINEAR new_function;
+  }
+  new_function.a = A;
+  new_function.b = B;
+  return (new_function);
+}
+
+func QUADRATIC::build(float A, float B, float C) : QUADRATIC
+{
+  var
+  {
+    QUADRATIC new_function;
+  }
+  new_function.a = A;
+  new_function.b = B;
+  new_function.c = C;
+  return (new_function);
+}
+
+
+// ====== main ====== //
+main
+{
+  var
+  {
+    linear f1;
+    quadratic f2;
+    integer counter;
+  }
+  f1 = f1.build(2, 3.5);
+  f2 = f2.build(-2.0, 1.0, 0.0);
+  counter = 1;
+
+  while(counter <= 10)
+  {
+    write(counter);
+    write(f1.evaluate(counter));
+    write(f2.evaluate(counter));
+  };
+}
 ```
 This compiler will generate the following AST:
 ```$xslt
 Prog -> nonTerminal
 ├── ClassList -> nonTerminal
+│   ├── ClassDecl -> nonTerminal
+│   │   ├── id -> POLYNOMIAL
+│   │   ├── InherList -> nonTerminal
+│   │   └── MembDecl -> nonTerminal
+│   │       ├── public -> public
+│   │       └── FuncDecl -> nonTerminal
+│   │           ├── id -> evaluate
+│   │           ├── FParamList -> nonTerminal
+│   │           │   └── FParam -> nonTerminal
+│   │           │       ├── float -> float
+│   │           │       ├── id -> x
+│   │           │       └── DimList -> nonTerminal
+│   │           └── ReturnType -> nonTerminal
+│   │               └── float -> float
+│   ├── ClassDecl -> nonTerminal
+│   │   ├── id -> LINEAR
+│   │   ├── InherList -> nonTerminal
+│   │   │   └── id -> POLYNOMIAL
+│   │   ├── MembDecl -> nonTerminal
+│   │   │   ├── private -> private
+│   │   │   └── VarDecl -> nonTerminal
+│   │   │       ├── float -> float
+│   │   │       ├── id -> a
+│   │   │       └── DimList -> nonTerminal
+│   │   ├── MembDecl -> nonTerminal
+│   │   │   ├── private -> private
+│   │   │   └── VarDecl -> nonTerminal
+│   │   │       ├── float -> float
+│   │   │       ├── id -> b
+│   │   │       └── DimList -> nonTerminal
+│   │   ├── MembDecl -> nonTerminal
+│   │   │   ├── public -> public
+│   │   │   └── FuncDecl -> nonTerminal
+│   │   │       ├── id -> build
+│   │   │       ├── FParamList -> nonTerminal
+│   │   │       │   ├── FParam -> nonTerminal
+│   │   │       │   │   ├── float -> float
+│   │   │       │   │   ├── id -> A
+│   │   │       │   │   └── DimList -> nonTerminal
+│   │   │       │   └── FParam -> nonTerminal
+│   │   │       │       ├── float -> float
+│   │   │       │       ├── id -> B
+│   │   │       │       └── DimList -> nonTerminal
+│   │   │       └── ReturnType -> nonTerminal
+│   │   │           └── id -> LINEAR
+│   │   └── MembDecl -> nonTerminal
+│   │       ├── public -> public
+│   │       └── FuncDecl -> nonTerminal
+│   │           ├── id -> evaluate
+│   │           ├── FParamList -> nonTerminal
+│   │           │   └── FParam -> nonTerminal
+│   │           │       ├── float -> float
+│   │           │       ├── id -> x
+│   │           │       └── DimList -> nonTerminal
+│   │           └── ReturnType -> nonTerminal
+│   │               └── float -> float
+│   └── ClassDecl -> nonTerminal
+│       ├── id -> QUADRATIC
+│       ├── InherList -> nonTerminal
+│       │   └── id -> POLYNOMIAL
+│       ├── MembDecl -> nonTerminal
+│       │   ├── private -> private
+│       │   └── VarDecl -> nonTerminal
+│       │       ├── float -> float
+│       │       ├── id -> a
+│       │       └── DimList -> nonTerminal
+│       ├── MembDecl -> nonTerminal
+│       │   ├── private -> private
+│       │   └── VarDecl -> nonTerminal
+│       │       ├── float -> float
+│       │       ├── id -> b
+│       │       └── DimList -> nonTerminal
+│       ├── MembDecl -> nonTerminal
+│       │   ├── private -> private
+│       │   └── VarDecl -> nonTerminal
+│       │       ├── float -> float
+│       │       ├── id -> c
+│       │       └── DimList -> nonTerminal
+│       ├── MembDecl -> nonTerminal
+│       │   ├── public -> public
+│       │   └── FuncDecl -> nonTerminal
+│       │       ├── id -> build
+│       │       ├── FParamList -> nonTerminal
+│       │       │   ├── FParam -> nonTerminal
+│       │       │   │   ├── float -> float
+│       │       │   │   ├── id -> A
+│       │       │   │   └── DimList -> nonTerminal
+│       │       │   ├── FParam -> nonTerminal
+│       │       │   │   ├── float -> float
+│       │       │   │   ├── id -> B
+│       │       │   │   └── DimList -> nonTerminal
+│       │       │   └── FParam -> nonTerminal
+│       │       │       ├── float -> float
+│       │       │       ├── id -> C
+│       │       │       └── DimList -> nonTerminal
+│       │       └── ReturnType -> nonTerminal
+│       │           └── id -> QUADRATIC
+│       └── MembDecl -> nonTerminal
+│           ├── public -> public
+│           └── FuncDecl -> nonTerminal
+│               ├── id -> evaluate
+│               ├── FParamList -> nonTerminal
+│               │   └── FParam -> nonTerminal
+│               │       ├── float -> float
+│               │       ├── id -> x
+│               │       └── DimList -> nonTerminal
+│               └── ReturnType -> nonTerminal
+│                   └── float -> float
 ├── FuncDefList -> nonTerminal
 │   ├── FuncDef -> nonTerminal
-│   │   ├── scope -> bubbleSort
+│   │   ├── scope -> POLYNOMIAL
+│   │   ├── id -> evaluate
 │   │   ├── FParamList -> nonTerminal
-│   │   │   ├── FParam -> nonTerminal
-│   │   │   │   ├── integer -> integer
-│   │   │   │   ├── id -> arr
-│   │   │   │   └── DimList -> nonTerminal
 │   │   │   └── FParam -> nonTerminal
-│   │   │       ├── integer -> integer
-│   │   │       ├── id -> size
+│   │   │       ├── float -> float
+│   │   │       ├── id -> x
 │   │   │       └── DimList -> nonTerminal
 │   │   ├── ReturnType -> nonTerminal
-│   │   │   └── void -> void
+│   │   │   └── float -> float
+│   │   └── StatList -> nonTerminal
+│   │       └── ReturnStat -> nonTerminal
+│   │           └── ReturnStat -> nonTerminal
+│   │               └── Expr -> nonTerminal
+│   │                   └── intnum -> 0
+│   ├── FuncDef -> nonTerminal
+│   │   ├── scope -> LINEAR
+│   │   ├── id -> evaluate
+│   │   ├── FParamList -> nonTerminal
+│   │   │   └── FParam -> nonTerminal
+│   │   │       ├── float -> float
+│   │   │       ├── id -> x
+│   │   │       └── DimList -> nonTerminal
+│   │   ├── ReturnType -> nonTerminal
+│   │   │   └── float -> float
 │   │   └── StatList -> nonTerminal
 │   │       ├── VarDecl -> nonTerminal
-│   │       │   ├── integer -> integer
-│   │       │   ├── id -> n
+│   │       │   ├── float -> float
+│   │       │   ├── id -> result
 │   │       │   └── DimList -> nonTerminal
+│   │       ├── Assign -> nonTerminal
+│   │       │   ├── id -> result
+│   │       │   │   └── IndiceList -> nonTerminal
+│   │       │   └── Expr -> nonTerminal
+│   │       │       └── floatnum -> 0.0
+│   │       ├── Assign -> nonTerminal
+│   │       │   ├── id -> result
+│   │       │   │   └── IndiceList -> nonTerminal
+│   │       │   └── Expr -> nonTerminal
+│   │       │       └── + -> +
+│   │       │           ├── * -> *
+│   │       │           │   ├── id -> a
+│   │       │           │   └── id -> x
+│   │       │           └── id -> b
+│   │       └── ReturnStat -> nonTerminal
+│   │           └── ReturnStat -> nonTerminal
+│   │               └── Expr -> nonTerminal
+│   │                   └── id -> result
+│   ├── FuncDef -> nonTerminal
+│   │   ├── scope -> QUADRATIC
+│   │   ├── id -> evaluate
+│   │   ├── FParamList -> nonTerminal
+│   │   │   └── FParam -> nonTerminal
+│   │   │       ├── float -> float
+│   │   │       ├── id -> x
+│   │   │       └── DimList -> nonTerminal
+│   │   ├── ReturnType -> nonTerminal
+│   │   │   └── float -> float
+│   │   └── StatList -> nonTerminal
 │   │       ├── VarDecl -> nonTerminal
-│   │       │   ├── integer -> integer
-│   │       │   ├── id -> i
+│   │       │   ├── float -> float
+│   │       │   ├── id -> result
 │   │       │   └── DimList -> nonTerminal
+│   │       ├── Assign -> nonTerminal
+│   │       │   ├── id -> result
+│   │       │   │   └── IndiceList -> nonTerminal
+│   │       │   └── Expr -> nonTerminal
+│   │       │       └── id -> a
+│   │       ├── Assign -> nonTerminal
+│   │       │   ├── id -> result
+│   │       │   │   └── IndiceList -> nonTerminal
+│   │       │   └── Expr -> nonTerminal
+│   │       │       └── + -> +
+│   │       │           ├── * -> *
+│   │       │           │   ├── id -> result
+│   │       │           │   └── id -> x
+│   │       │           └── id -> b
+│   │       ├── Assign -> nonTerminal
+│   │       │   ├── id -> result
+│   │       │   │   └── IndiceList -> nonTerminal
+│   │       │   └── Expr -> nonTerminal
+│   │       │       └── + -> +
+│   │       │           ├── * -> *
+│   │       │           │   ├── id -> result
+│   │       │           │   └── id -> x
+│   │       │           └── id -> c
+│   │       └── ReturnStat -> nonTerminal
+│   │           └── ReturnStat -> nonTerminal
+│   │               └── Expr -> nonTerminal
+│   │                   └── id -> result
+│   ├── FuncDef -> nonTerminal
+│   │   ├── scope -> LINEAR
+│   │   ├── id -> build
+│   │   ├── FParamList -> nonTerminal
+│   │   │   ├── FParam -> nonTerminal
+│   │   │   │   ├── float -> float
+│   │   │   │   ├── id -> A
+│   │   │   │   └── DimList -> nonTerminal
+│   │   │   └── FParam -> nonTerminal
+│   │   │       ├── float -> float
+│   │   │       ├── id -> B
+│   │   │       └── DimList -> nonTerminal
+│   │   ├── ReturnType -> nonTerminal
+│   │   │   └── id -> LINEAR
+│   │   └── StatList -> nonTerminal
 │   │       ├── VarDecl -> nonTerminal
-│   │       │   ├── integer -> integer
-│   │       │   ├── id -> j
-│   │       │   └── DimList -> nonTerminal
-│   │       ├── VarDecl -> nonTerminal
-│   │       │   ├── integer -> integer
-│   │       │   ├── id -> temp
+│   │       │   ├── id -> LINEAR
+│   │       │   ├── id -> new_function
 │   │       │   └── DimList -> nonTerminal
 │   │       ├── Assign -> nonTerminal
-│   │       │   ├── id -> n
-│   │       │   │   └── IndiceList -> nonTerminal
+│   │       │   ├── Dot -> nonTerminal
+│   │       │   │   ├── id -> new_function
+│   │       │   │   │   └── IndiceList -> nonTerminal
+│   │       │   │   └── id -> a
+│   │       │   │       └── IndiceList -> nonTerminal
 │   │       │   └── Expr -> nonTerminal
-│   │       │       └── id -> size
+│   │       │       └── id -> A
 │   │       ├── Assign -> nonTerminal
-│   │       │   ├── id -> i
-│   │       │   │   └── IndiceList -> nonTerminal
+│   │       │   ├── Dot -> nonTerminal
+│   │       │   │   ├── id -> new_function
+│   │       │   │   │   └── IndiceList -> nonTerminal
+│   │       │   │   └── id -> b
+│   │       │   │       └── IndiceList -> nonTerminal
 │   │       │   └── Expr -> nonTerminal
-│   │       │       └── intnum -> 0
-│   │       ├── Assign -> nonTerminal
-│   │       │   ├── id -> j
-│   │       │   │   └── IndiceList -> nonTerminal
-│   │       │   └── Expr -> nonTerminal
-│   │       │       └── intnum -> 0
-│   │       ├── Assign -> nonTerminal
-│   │       │   ├── id -> temp
-│   │       │   │   └── IndiceList -> nonTerminal
-│   │       │   └── Expr -> nonTerminal
-│   │       │       └── intnum -> 0
-│   │       └── WhileStat -> nonTerminal
-│   │           ├── Expr -> nonTerminal
-│   │           │   └── lt -> <
-│   │           │       ├── id -> i
-│   │           │       └── - -> -
-│   │           │           ├── id -> n
-│   │           │           └── intnum -> 1
-│   │           └── StatBlock -> nonTerminal
-│   │               ├── WhileStat -> nonTerminal
-│   │               │   ├── Expr -> nonTerminal
-│   │               │   │   └── lt -> <
-│   │               │   │       ├── id -> j
-│   │               │   │       └── - -> -
-│   │               │   │           ├── - -> -
-│   │               │   │           │   ├── id -> n
-│   │               │   │           │   └── id -> i
-│   │               │   │           └── intnum -> 1
-│   │               │   └── StatBlock -> nonTerminal
-│   │               │       ├── IfStat -> nonTerminal
-│   │               │       │   ├── Expr -> nonTerminal
-│   │               │       │   │   └── gt -> >
-│   │               │       │   │       ├── id -> arr
-│   │               │       │   │       │   └── IndiceList -> nonTerminal
-│   │               │       │   │       │       └── Expr -> nonTerminal
-│   │               │       │   │       │           └── id -> j
-│   │               │       │   │       └── id -> arr
-│   │               │       │   │           └── IndiceList -> nonTerminal
-│   │               │       │   │               └── Expr -> nonTerminal
-│   │               │       │   │                   └── + -> +
-│   │               │       │   │                       ├── id -> j
-│   │               │       │   │                       └── intnum -> 1
-│   │               │       │   ├── ThenBLock -> nonTerminal
-│   │               │       │   │   └── StatBlock -> nonTerminal
-│   │               │       │   │       ├── Assign -> nonTerminal
-│   │               │       │   │       │   ├── id -> temp
-│   │               │       │   │       │   │   └── IndiceList -> nonTerminal
-│   │               │       │   │       │   └── Expr -> nonTerminal
-│   │               │       │   │       │       └── id -> arr
-│   │               │       │   │       │           └── IndiceList -> nonTerminal
-│   │               │       │   │       │               └── Expr -> nonTerminal
-│   │               │       │   │       │                   └── id -> j
-│   │               │       │   │       ├── Assign -> nonTerminal
-│   │               │       │   │       │   ├── id -> arr
-│   │               │       │   │       │   │   └── IndiceList -> nonTerminal
-│   │               │       │   │       │   │       └── Expr -> nonTerminal
-│   │               │       │   │       │   │           └── id -> j
-│   │               │       │   │       │   └── Expr -> nonTerminal
-│   │               │       │   │       │       └── id -> arr
-│   │               │       │   │       │           └── IndiceList -> nonTerminal
-│   │               │       │   │       │               └── Expr -> nonTerminal
-│   │               │       │   │       │                   └── + -> +
-│   │               │       │   │       │                       ├── id -> j
-│   │               │       │   │       │                       └── intnum -> 1
-│   │               │       │   │       └── Assign -> nonTerminal
-│   │               │       │   │           ├── id -> arr
-│   │               │       │   │           │   └── IndiceList -> nonTerminal
-│   │               │       │   │           │       └── Expr -> nonTerminal
-│   │               │       │   │           │           └── + -> +
-│   │               │       │   │           │               ├── id -> j
-│   │               │       │   │           │               └── intnum -> 1
-│   │               │       │   │           └── Expr -> nonTerminal
-│   │               │       │   │               └── id -> temp
-│   │               │       │   └── ElseBlock -> nonTerminal
-│   │               │       └── Assign -> nonTerminal
-│   │               │           ├── id -> j
-│   │               │           │   └── IndiceList -> nonTerminal
-│   │               │           └── Expr -> nonTerminal
-│   │               │               └── + -> +
-│   │               │                   ├── id -> j
-│   │               │                   └── intnum -> 1
-│   │               └── Assign -> nonTerminal
-│   │                   ├── id -> i
-│   │                   │   └── IndiceList -> nonTerminal
-│   │                   └── Expr -> nonTerminal
-│   │                       └── + -> +
-│   │                           ├── id -> i
-│   │                           └── intnum -> 1
+│   │       │       └── id -> B
+│   │       └── ReturnStat -> nonTerminal
+│   │           └── ReturnStat -> nonTerminal
+│   │               └── Expr -> nonTerminal
+│   │                   └── id -> new_function
 │   └── FuncDef -> nonTerminal
-│       ├── scope -> printArray
+│       ├── scope -> QUADRATIC
+│       ├── id -> build
 │       ├── FParamList -> nonTerminal
 │       │   ├── FParam -> nonTerminal
-│       │   │   ├── integer -> integer
-│       │   │   ├── id -> arr
+│       │   │   ├── float -> float
+│       │   │   ├── id -> A
+│       │   │   └── DimList -> nonTerminal
+│       │   ├── FParam -> nonTerminal
+│       │   │   ├── float -> float
+│       │   │   ├── id -> B
 │       │   │   └── DimList -> nonTerminal
 │       │   └── FParam -> nonTerminal
-│       │       ├── integer -> integer
-│       │       ├── id -> size
+│       │       ├── float -> float
+│       │       ├── id -> C
 │       │       └── DimList -> nonTerminal
 │       ├── ReturnType -> nonTerminal
-│       │   └── void -> void
+│       │   └── id -> QUADRATIC
 │       └── StatList -> nonTerminal
 │           ├── VarDecl -> nonTerminal
-│           │   ├── integer -> integer
-│           │   ├── id -> n
-│           │   └── DimList -> nonTerminal
-│           ├── VarDecl -> nonTerminal
-│           │   ├── integer -> integer
-│           │   ├── id -> i
+│           │   ├── id -> QUADRATIC
+│           │   ├── id -> new_function
 │           │   └── DimList -> nonTerminal
 │           ├── Assign -> nonTerminal
-│           │   ├── id -> n
-│           │   │   └── IndiceList -> nonTerminal
+│           │   ├── Dot -> nonTerminal
+│           │   │   ├── id -> new_function
+│           │   │   │   └── IndiceList -> nonTerminal
+│           │   │   └── id -> a
+│           │   │       └── IndiceList -> nonTerminal
 │           │   └── Expr -> nonTerminal
-│           │       └── id -> size
+│           │       └── id -> A
 │           ├── Assign -> nonTerminal
-│           │   ├── id -> i
-│           │   │   └── IndiceList -> nonTerminal
+│           │   ├── Dot -> nonTerminal
+│           │   │   ├── id -> new_function
+│           │   │   │   └── IndiceList -> nonTerminal
+│           │   │   └── id -> b
+│           │   │       └── IndiceList -> nonTerminal
 │           │   └── Expr -> nonTerminal
-│           │       └── intnum -> 0
-│           └── WhileStat -> nonTerminal
-│               ├── Expr -> nonTerminal
-│               │   └── lt -> <
-│               │       ├── id -> i
-│               │       └── id -> n
-│               └── StatBlock -> nonTerminal
-│                   ├── WriteStat -> nonTerminal
-│                   │   └── Expr -> nonTerminal
-│                   │       └── id -> arr
-│                   │           └── IndiceList -> nonTerminal
-│                   │               └── Expr -> nonTerminal
-│                   │                   └── id -> i
-│                   └── Assign -> nonTerminal
-│                       ├── id -> i
-│                       │   └── IndiceList -> nonTerminal
-│                       └── Expr -> nonTerminal
-│                           └── + -> +
-│                               ├── id -> i
-│                               └── intnum -> 1
+│           │       └── id -> B
+│           ├── Assign -> nonTerminal
+│           │   ├── Dot -> nonTerminal
+│           │   │   ├── id -> new_function
+│           │   │   │   └── IndiceList -> nonTerminal
+│           │   │   └── id -> c
+│           │   │       └── IndiceList -> nonTerminal
+│           │   └── Expr -> nonTerminal
+│           │       └── id -> C
+│           └── ReturnStat -> nonTerminal
+│               └── ReturnStat -> nonTerminal
+│                   └── Expr -> nonTerminal
+│                       └── id -> new_function
 └── FuncMain -> nonTerminal
     └── StatList -> nonTerminal
         ├── VarDecl -> nonTerminal
-        │   ├── integer -> integer
-        │   ├── id -> arr
+        │   ├── id -> linear
+        │   ├── id -> f1
         │   └── DimList -> nonTerminal
-        │       └── intnum -> 7
+        ├── VarDecl -> nonTerminal
+        │   ├── id -> quadratic
+        │   ├── id -> f2
+        │   └── DimList -> nonTerminal
+        ├── VarDecl -> nonTerminal
+        │   ├── integer -> integer
+        │   ├── id -> counter
+        │   └── DimList -> nonTerminal
         ├── Assign -> nonTerminal
-        │   ├── id -> arr
+        │   ├── id -> f1
         │   │   └── IndiceList -> nonTerminal
-        │   │       └── Expr -> nonTerminal
-        │   │           └── intnum -> 0
         │   └── Expr -> nonTerminal
-        │       └── intnum -> 64
+        │       └── Dot -> nonTerminal
+        │           ├── id -> f1
+        │           │   └── IndiceList -> nonTerminal
+        │           └── id -> build
+        │               └── FParamList -> nonTerminal
+        │                   ├── Expr -> nonTerminal
+        │                   │   └── intnum -> 2
+        │                   └── Expr -> nonTerminal
+        │                       └── floatnum -> 3.5
         ├── Assign -> nonTerminal
-        │   ├── id -> arr
+        │   ├── id -> f2
         │   │   └── IndiceList -> nonTerminal
-        │   │       └── Expr -> nonTerminal
-        │   │           └── intnum -> 1
         │   └── Expr -> nonTerminal
-        │       └── intnum -> 34
+        │       └── Dot -> nonTerminal
+        │           ├── id -> f2
+        │           │   └── IndiceList -> nonTerminal
+        │           └── id -> build
+        │               └── FParamList -> nonTerminal
+        │                   ├── Expr -> nonTerminal
+        │                   │   └── - -> -
+        │                   │       └── floatnum -> 2.0
+        │                   ├── Expr -> nonTerminal
+        │                   │   └── floatnum -> 1.0
+        │                   └── Expr -> nonTerminal
+        │                       └── floatnum -> 0.0
         ├── Assign -> nonTerminal
-        │   ├── id -> arr
+        │   ├── id -> counter
         │   │   └── IndiceList -> nonTerminal
-        │   │       └── Expr -> nonTerminal
-        │   │           └── intnum -> 2
         │   └── Expr -> nonTerminal
-        │       └── intnum -> 25
-        ├── Assign -> nonTerminal
-        │   ├── id -> arr
-        │   │   └── IndiceList -> nonTerminal
-        │   │       └── Expr -> nonTerminal
-        │   │           └── intnum -> 3
-        │   └── Expr -> nonTerminal
-        │       └── intnum -> 12
-        ├── Assign -> nonTerminal
-        │   ├── id -> arr
-        │   │   └── IndiceList -> nonTerminal
-        │   │       └── Expr -> nonTerminal
-        │   │           └── intnum -> 4
-        │   └── Expr -> nonTerminal
-        │       └── intnum -> 22
-        ├── Assign -> nonTerminal
-        │   ├── id -> arr
-        │   │   └── IndiceList -> nonTerminal
-        │   │       └── Expr -> nonTerminal
-        │   │           └── intnum -> 5
-        │   └── Expr -> nonTerminal
-        │       └── intnum -> 11
-        ├── Assign -> nonTerminal
-        │   ├── id -> arr
-        │   │   └── IndiceList -> nonTerminal
-        │   │       └── Expr -> nonTerminal
-        │   │           └── intnum -> 6
-        │   └── Expr -> nonTerminal
-        │       └── intnum -> 90
-        ├── Func -> nonTerminal
-        │   └── id -> printarray
-        │       └── FParamList -> nonTerminal
-        │           ├── Expr -> nonTerminal
-        │           │   └── id -> arr
-        │           └── Expr -> nonTerminal
-        │               └── intnum -> 7
-        ├── Func -> nonTerminal
-        │   └── id -> bubbleSort
-        │       └── FParamList -> nonTerminal
-        │           ├── Expr -> nonTerminal
-        │           │   └── id -> arr
-        │           └── Expr -> nonTerminal
-        │               └── intnum -> 7
-        └── Func -> nonTerminal
-            └── id -> printarray
-                └── FParamList -> nonTerminal
-                    ├── Expr -> nonTerminal
-                    │   └── id -> arr
+        │       └── intnum -> 1
+        └── WhileStat -> nonTerminal
+            ├── Expr -> nonTerminal
+            │   └── leq -> <=
+            │       ├── id -> counter
+            │       └── intnum -> 10
+            └── StatBlock -> nonTerminal
+                ├── WriteStat -> nonTerminal
+                │   └── Expr -> nonTerminal
+                │       └── id -> counter
+                ├── WriteStat -> nonTerminal
+                │   └── Expr -> nonTerminal
+                │       └── Dot -> nonTerminal
+                │           ├── id -> f1
+                │           │   └── IndiceList -> nonTerminal
+                │           └── id -> evaluate
+                │               └── FParamList -> nonTerminal
+                │                   └── Expr -> nonTerminal
+                │                       └── id -> counter
+                └── WriteStat -> nonTerminal
                     └── Expr -> nonTerminal
-                        └── intnum -> 7
+                        └── Dot -> nonTerminal
+                            ├── id -> f2
+                            │   └── IndiceList -> nonTerminal
+                            └── id -> evaluate
+                                └── FParamList -> nonTerminal
+                                    └── Expr -> nonTerminal
+                                        └── id -> counter
 ```
 
